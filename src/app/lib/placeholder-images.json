@@ -1,0 +1,29 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-cleaning",
+      "description": "Professional cleaner in uniform smiling",
+      "imageUrl": "https://picsum.photos/seed/clean1/1200/600",
+      "imageHint": "professional cleaner"
+    },
+    {
+      "id": "office-cleaning",
+      "description": "A clean modern office space",
+      "imageUrl": "https://picsum.photos/seed/clean2/600/400",
+      "imageHint": "clean office"
+    },
+    {
+      "id": "team-cleaning",
+      "description": "Group of professional cleaners with equipment",
+      "imageUrl": "https://picsum.photos/seed/clean3/600/400",
+      "imageHint": "cleaning team"
+    },
+    {
+      "id": "equipment",
+      "description": "Modern cleaning supplies and equipment",
+      "imageUrl": "https://picsum.photos/seed/clean4/400/300",
+      "imageHint": "cleaning supplies"
+    }
+  ]
+}
