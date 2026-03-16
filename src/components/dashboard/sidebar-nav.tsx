@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -41,26 +40,28 @@ export function SidebarNav() {
   const pathname = usePathname();
 
   return (
-    <Sidebar variant="sidebar" className="border-r">
-      <SidebarHeader className="h-20 flex items-center px-6 border-b">
+    <Sidebar variant="sidebar" className="border-r border-sidebar-border bg-sidebar">
+      <SidebarHeader className="h-20 flex items-center px-6 border-b border-sidebar-border">
         <Link href="/" className="flex items-center gap-2">
           <ShieldCheck className="text-primary w-6 h-6" />
-          <span className="font-bold text-lg text-primary font-headline tracking-tight">CleanPro</span>
+          <span className="font-bold text-lg text-sidebar-foreground font-headline tracking-tight">CleanSweep</span>
         </Link>
       </SidebarHeader>
       <SidebarContent className="p-4 space-y-8">
         <div>
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-2">Main Menu</h3>
+          <h3 className="text-[10px] font-bold text-sidebar-foreground/50 uppercase tracking-widest mb-4 px-3">Main Menu</h3>
           <SidebarMenu>
             {navItems.map((item) => (
               <SidebarMenuItem key={item.name}>
                 <SidebarMenuButton asChild isActive={pathname === item.href}>
                   <Link href={item.href} className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-md transition-colors",
-                    pathname === item.href ? "bg-primary text-white" : "hover:bg-muted"
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200",
+                    pathname === item.href 
+                      ? "bg-primary text-white shadow-lg shadow-primary/20" 
+                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-white"
                   )}>
                     <item.icon className="w-5 h-5" />
-                    <span className="font-medium">{item.name}</span>
+                    <span className="font-semibold text-sm">{item.name}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -69,17 +70,19 @@ export function SidebarNav() {
         </div>
 
         <div>
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-2">Account</h3>
+          <h3 className="text-[10px] font-bold text-sidebar-foreground/50 uppercase tracking-widest mb-4 px-3">Account</h3>
           <SidebarMenu>
             {secondaryItems.map((item) => (
               <SidebarMenuItem key={item.name}>
                 <SidebarMenuButton asChild isActive={pathname === item.href}>
                   <Link href={item.href} className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-md transition-colors",
-                    pathname === item.href ? "bg-primary text-white" : "hover:bg-muted"
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200",
+                    pathname === item.href 
+                      ? "bg-primary text-white shadow-lg shadow-primary/20" 
+                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-white"
                   )}>
                     <item.icon className="w-5 h-5" />
-                    <span className="font-medium">{item.name}</span>
+                    <span className="font-semibold text-sm">{item.name}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -88,11 +91,11 @@ export function SidebarNav() {
         </div>
       </SidebarContent>
       <SidebarFooter className="p-4 mt-auto">
-        <SidebarSeparator className="mb-4" />
+        <SidebarSeparator className="mb-4 bg-sidebar-border" />
         <Link href="/">
-          <button className="flex items-center gap-3 px-3 py-2 w-full text-muted-foreground hover:text-destructive transition-colors">
+          <button className="flex items-center gap-3 px-3 py-2.5 w-full text-sidebar-foreground/60 hover:text-destructive transition-colors rounded-xl hover:bg-destructive/5">
             <LogOut className="w-5 h-5" />
-            <span className="font-medium">Logout</span>
+            <span className="font-semibold text-sm">Logout</span>
           </button>
         </Link>
       </SidebarFooter>
