@@ -1,125 +1,734 @@
-
 {
   "entities": {
-    "User": {
-      "title": "User",
-      "description": "A platform user with an assigned role.",
-      "type": "object",
-      "properties": {
-        "uid": { "type": "string" },
-        "email": { "type": "string", "format": "email" },
-        "role": { "type": "string", "enum": ["Customer", "Admin", "Service Provider"] },
-        "firstName": { "type": "string" },
-        "lastName": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["uid", "email", "role"]
-    },
     "ServiceProvider": {
-      "title": "Service Provider",
-      "description": "Details about a service provider applying to join CleanSweep.",
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ServiceProvider",
       "type": "object",
+      "description": "Represents an independent service provider registered with the National Cleaning Company, managing their profile, schedule, and financial information.",
       "properties": {
-        "uid": { "type": "string" },
-        "firstName": { "type": "string" },
-        "lastName": { "type": "string" },
-        "email": { "type": "string", "format": "email" },
-        "phone": { "type": "string" },
-        "city": { "type": "string" },
-        "experience": { "type": "string" },
-        "teamSize": { "type": "string" },
-        "expertise": { "type": "array", "items": { "type": "string" } },
-        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["firstName", "lastName", "email"]
-    },
-    "ProviderCoverage": {
-      "title": "Provider Coverage",
-      "description": "Geospatial coverage settings for a service provider.",
-      "type": "object",
-      "properties": {
-        "providerId": { "type": "string" },
-        "center": {
-          "type": "object",
-          "properties": {
-            "lat": { "type": "number" },
-            "lng": { "type": "number" }
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ServiceProvider entity."
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The first name of the service provider."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The last name of the service provider."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the service provider, used for communication.",
+          "format": "email"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "The primary phone number of the service provider."
+        },
+        "addressStreet": {
+          "type": "string",
+          "description": "The street address of the service provider."
+        },
+        "addressCity": {
+          "type": "string",
+          "description": "The city part of the service provider's address."
+        },
+        "addressState": {
+          "type": "string",
+          "description": "The state or province part of the service provider's address."
+        },
+        "addressZip": {
+          "type": "string",
+          "description": "The postal or ZIP code part of the service provider's address."
+        },
+        "companyName": {
+          "type": "string",
+          "description": "The name of the service provider's independent company, if applicable."
+        },
+        "serviceAreaZipCodes": {
+          "type": "array",
+          "description": "A list of ZIP codes or postal codes defining the service provider's operational area.",
+          "items": {
+            "type": "string"
           }
         },
-        "radiusMiles": { "type": "number" },
-        "selectedZips": { "type": "array", "items": { "type": "string" } },
-        "excludedZips": { "type": "array", "items": { "type": "string" } },
-        "geohash": { "type": "string" },
-        "updatedAt": { "type": "string", "format": "date-time" }
-      }
+        "status": {
+          "type": "string",
+          "description": "The current status of the service provider (e.g., 'pending_approval', 'active', 'inactive')."
+        },
+        "registrationDate": {
+          "type": "string",
+          "description": "The date and time when the service provider registered.",
+          "format": "date-time"
+        },
+        "bio": {
+          "type": "string",
+          "description": "A brief biography or description of the service provider's experience and services."
+        },
+        "profileImageUrl": {
+          "type": "string",
+          "description": "URL to the service provider's profile picture.",
+          "format": "uri"
+        },
+        "taxIdNumber": {
+          "type": "string",
+          "description": "The tax identification number for accounting and payment purposes."
+        },
+        "averageRating": {
+          "type": "number",
+          "description": "The average rating received by the service provider from completed jobs."
+        },
+        "adminNotes": {
+          "type": "string",
+          "description": "Internal notes added by administrators about the service provider."
+        }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "lastName",
+        "email",
+        "phoneNumber",
+        "addressStreet",
+        "addressCity",
+        "addressState",
+        "addressZip",
+        "status",
+        "registrationDate"
+      ]
     },
-    "Job": {
-      "title": "Job",
-      "description": "A scheduled cleaning service job.",
+    "Client": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Client",
       "type": "object",
+      "description": "Represents a customer who uses the National Cleaning Company's services.",
       "properties": {
-        "clientName": { "type": "string" },
-        "type": { "type": "string" },
-        "time": { "type": "string" },
-        "address": { "type": "string" },
-        "status": { "type": "string", "enum": ["Confirmed", "Pending", "Completed"] },
-        "price": { "type": "number" },
-        "createdAt": { "type": "string", "format": "date-time" }
-      }
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Client entity."
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The first name of the client."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The last name of the client."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the client, used for communication.",
+          "format": "email"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "The primary phone number of the client."
+        },
+        "addressStreet": {
+          "type": "string",
+          "description": "The street address where services are typically rendered for the client."
+        },
+        "addressCity": {
+          "type": "string",
+          "description": "The city part of the client's service address."
+        },
+        "addressState": {
+          "type": "string",
+          "description": "The state or province part of the client's service address."
+        },
+        "addressZip": {
+          "type": "string",
+          "description": "The postal or ZIP code part of the client's service address."
+        },
+        "companyName": {
+          "type": "string",
+          "description": "The name of the client's company, if they are a business client."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Internal notes added by administrators or service providers about the client."
+        },
+        "registrationDate": {
+          "type": "string",
+          "description": "The date and time when the client registered with the company.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "lastName",
+        "email",
+        "phoneNumber",
+        "addressStreet",
+        "addressCity",
+        "addressState",
+        "addressZip",
+        "registrationDate"
+      ]
     },
-    "Message": {
-      "title": "Message",
-      "description": "A message in a conversation thread.",
+    "Administrator": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Administrator",
       "type": "object",
+      "description": "Represents an internal administrator of the National Cleaning Company who manages operations, clients, and service providers.",
       "properties": {
-        "sender": { "type": "string", "enum": ["client", "admin", "provider"] },
-        "text": { "type": "string" },
-        "time": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" }
-      }
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Administrator entity."
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The first name of the administrator."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The last name of the administrator."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the administrator.",
+          "format": "email"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "The primary phone number of the administrator."
+        },
+        "role": {
+          "type": "string",
+          "description": "The specific role or department of the administrator (e.g., 'SuperAdmin', 'Operations', 'Finance', 'Support')."
+        },
+        "hireDate": {
+          "type": "string",
+          "description": "The date when the administrator was hired.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "lastName",
+        "email",
+        "role",
+        "hireDate"
+      ]
+    },
+    "ServiceJob": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ServiceJob",
+      "type": "object",
+      "description": "Represents a single cleaning service job assigned to a service provider for a client.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ServiceJob entity."
+        },
+        "clientId": {
+          "type": "string",
+          "description": "Reference to the Client requesting the service. (Relationship: Client 1:N ServiceJob)"
+        },
+        "serviceProviderId": {
+          "type": "string",
+          "description": "Reference to the ServiceProvider assigned to this job. (Relationship: ServiceProvider 1:N ServiceJob)"
+        },
+        "serviceType": {
+          "type": "string",
+          "description": "The type of cleaning service requested (e.g., 'Standard Residential Clean', 'Deep Commercial Clean')."
+        },
+        "scheduledStartTime": {
+          "type": "string",
+          "description": "The planned start date and time for the service job.",
+          "format": "date-time"
+        },
+        "scheduledEndTime": {
+          "type": "string",
+          "description": "The planned end date and time for the service job.",
+          "format": "date-time"
+        },
+        "actualStartTime": {
+          "type": "string",
+          "description": "The actual start date and time when the service provider began the job.",
+          "format": "date-time"
+        },
+        "actualEndTime": {
+          "type": "string",
+          "description": "The actual end date and time when the service provider completed the job.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the service job (e.g., 'Scheduled', 'InProgress', 'Completed', 'Cancelled', 'Rescheduled')."
+        },
+        "specialInstructions": {
+          "type": "string",
+          "description": "Any specific instructions or requests from the client for this job."
+        },
+        "providerNotes": {
+          "type": "string",
+          "description": "Notes added by the service provider regarding the job."
+        },
+        "clientRating": {
+          "type": "number",
+          "description": "The rating (e.g., 1-5 stars) given by the client for this specific job."
+        },
+        "clientFeedback": {
+          "type": "string",
+          "description": "Textual feedback provided by the client after job completion."
+        },
+        "price": {
+          "type": "number",
+          "description": "The total monetary price for this service job."
+        },
+        "paymentStatus": {
+          "type": "string",
+          "description": "The payment status of the job (e.g., 'Pending', 'Paid', 'Refunded')."
+        },
+        "creationDate": {
+          "type": "string",
+          "description": "The date and time when the service job was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "clientId",
+        "serviceProviderId",
+        "serviceType",
+        "scheduledStartTime",
+        "scheduledEndTime",
+        "status",
+        "price",
+        "paymentStatus",
+        "creationDate"
+      ]
+    },
+    "ScheduleEntry": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ScheduleEntry",
+      "type": "object",
+      "description": "Represents an entry in a service provider's schedule, indicating availability, a specific job, or blocked time.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ScheduleEntry entity."
+        },
+        "serviceProviderId": {
+          "type": "string",
+          "description": "Reference to the ServiceProvider whose schedule this entry belongs to. (Relationship: ServiceProvider 1:N ScheduleEntry)"
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of schedule entry (e.g., 'Job', 'Availability', 'BlockedTime', 'Break')."
+        },
+        "startTime": {
+          "type": "string",
+          "description": "The start date and time of the schedule entry.",
+          "format": "date-time"
+        },
+        "endTime": {
+          "type": "string",
+          "description": "The end date and time of the schedule entry.",
+          "format": "date-time"
+        },
+        "serviceJobId": {
+          "type": "string",
+          "description": "Optional reference to a ServiceJob if this schedule entry corresponds to a job. (Relationship: ServiceJob 0:1 ScheduleEntry)"
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the schedule entry, especially for non-job related times (e.g., 'Lunch Break')."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the schedule entry (e.g., 'Confirmed', 'Tentative', 'Cancelled')."
+        }
+      },
+      "required": [
+        "id",
+        "serviceProviderId",
+        "type",
+        "startTime",
+        "endTime",
+        "status"
+      ]
     },
     "Invoice": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Invoice",
-      "description": "A payment record for a completed job.",
       "type": "object",
+      "description": "Represents a bill issued to a client for services rendered, detailing amounts due and payment status.",
       "properties": {
-        "invoiceId": { "type": "string" },
-        "date": { "type": "string" },
-        "amount": { "type": "string" },
-        "status": { "type": "string", "enum": ["Paid", "Processing", "Pending"] },
-        "client": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" }
-      }
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Invoice entity."
+        },
+        "clientId": {
+          "type": "string",
+          "description": "Reference to the Client to whom this invoice is issued. (Relationship: Client 1:N Invoice)"
+        },
+        "issueDate": {
+          "type": "string",
+          "description": "The date and time when the invoice was issued.",
+          "format": "date-time"
+        },
+        "dueDate": {
+          "type": "string",
+          "description": "The date by which the invoice payment is expected.",
+          "format": "date-time"
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "The total monetary amount due on this invoice."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current payment status of the invoice (e.g., 'Pending', 'Paid', 'Overdue', 'Partially Paid', 'Voided')."
+        },
+        "paymentDate": {
+          "type": "string",
+          "description": "The date and time when the invoice was fully paid.",
+          "format": "date-time"
+        },
+        "serviceJobIds": {
+          "type": "array",
+          "description": "References to ServiceJob entities included in this invoice. (Relationship: ServiceJob N:N Invoice)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string",
+          "description": "Any additional notes or internal comments related to the invoice."
+        }
+      },
+      "required": [
+        "id",
+        "clientId",
+        "issueDate",
+        "dueDate",
+        "totalAmount",
+        "status"
+      ]
+    },
+    "PayoutTransaction": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "PayoutTransaction",
+      "type": "object",
+      "description": "Represents a financial transaction from the company to a service provider, such as payment for services or bonuses.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the PayoutTransaction entity."
+        },
+        "serviceProviderId": {
+          "type": "string",
+          "description": "Reference to the ServiceProvider receiving this payout. (Relationship: ServiceProvider 1:N PayoutTransaction)"
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of payout (e.g., 'Payment', 'Bonus', 'Deduction')."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The monetary amount of the transaction."
+        },
+        "transactionDate": {
+          "type": "string",
+          "description": "The date and time when the transaction occurred.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the payout (e.g., 'Pending', 'Paid', 'Failed')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the payout transaction (e.g., 'Weekly payout for jobs completed')."
+        },
+        "relatedServiceJobIds": {
+          "type": "array",
+          "description": "Optional references to ServiceJob entities that this payout covers. (Relationship: ServiceJob N:N PayoutTransaction)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "relatedInvoiceId": {
+          "type": "string",
+          "description": "Optional reference to an Invoice if this payout is directly linked to client payment for that invoice. (Relationship: Invoice 0:1 PayoutTransaction)"
+        }
+      },
+      "required": [
+        "id",
+        "serviceProviderId",
+        "type",
+        "amount",
+        "transactionDate",
+        "status"
+      ]
+    },
+    "Conversation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Conversation",
+      "type": "object",
+      "description": "Represents a communication thread between service providers, clients, and/or administrators within the internal messaging system.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Conversation entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "A user-friendly title or subject for the conversation."
+        },
+        "participantIds": {
+          "type": "array",
+          "description": "An array of unique identifiers for all participants in this conversation. These IDs can refer to ServiceProvider, Client, or Administrator entities. (Relationship: ServiceProvider N:N Conversation, Client N:N Conversation, Administrator N:N Conversation)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lastMessageTimestamp": {
+          "type": "string",
+          "description": "The date and time of the most recent message in the conversation.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the conversation (e.g., 'Active', 'Archived', 'Resolved')."
+        },
+        "relatedServiceJobId": {
+          "type": "string",
+          "description": "Optional reference to a ServiceJob if the conversation is directly related to a specific job. (Relationship: ServiceJob 0:1 Conversation)"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "participantIds",
+        "lastMessageTimestamp",
+        "status"
+      ]
+    },
+    "Message": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Message",
+      "type": "object",
+      "description": "Represents a single message sent within a conversation in the internal messaging system.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Message entity."
+        },
+        "conversationId": {
+          "type": "string",
+          "description": "Reference to the Conversation this message belongs to. (Relationship: Conversation 1:N Message)"
+        },
+        "senderId": {
+          "type": "string",
+          "description": "The ID of the user who sent the message. This can be a ServiceProvider, Client, or Administrator ID."
+        },
+        "senderType": {
+          "type": "string",
+          "description": "The type of entity that sent the message (e.g., 'ServiceProvider', 'Client', 'Administrator'). Used in conjunction with senderId for polymorphic referencing."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "The date and time when the message was sent.",
+          "format": "date-time"
+        },
+        "content": {
+          "type": "string",
+          "description": "The textual content of the message."
+        },
+        "isReadByRecipientIds": {
+          "type": "array",
+          "description": "An array of IDs of the participants in the conversation who have read this message. (Relationship: ServiceProvider N:N Message, Client N:N Message, Administrator N:N Message)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "conversationId",
+        "senderId",
+        "senderType",
+        "timestamp",
+        "content"
+      ]
     }
   },
   "auth": {
-    "providers": ["password", "google.com"]
+    "providers": [
+      "password",
+      "anonymous"
+    ]
   },
   "firestore": {
-    "users/{userId}": {
-      "schema": "User",
-      "description": "General user accounts and roles."
-    },
-    "serviceProviders/{providerId}": {
-      "schema": "ServiceProvider",
-      "description": "Registration records for cleaning service providers."
-    },
-    "provider_coverage/{providerId}": {
-      "schema": "ProviderCoverage",
-      "description": "Geospatial coverage settings."
-    },
-    "jobs/{jobId}": {
-      "schema": "Job",
-      "description": "Scheduled cleaning jobs."
-    },
-    "messages/{messageId}": {
-      "schema": "Message",
-      "description": "Chat messages."
-    },
-    "invoices/{invoiceId}": {
-      "schema": "Invoice",
-      "description": "Billing records."
-    }
+    "structure": [
+      {
+        "path": "/serviceProviders/{serviceProviderId}",
+        "definition": {
+          "entityName": "ServiceProvider",
+          "schema": {
+            "$ref": "#/backend/entities/ServiceProvider"
+          },
+          "description": "Stores the profile information for an independent service provider. The document ID (`serviceProviderId`) directly corresponds to the Firebase Authentication UID of the service provider. This collection defines the 'Service Provider' role for DBAC. Only the service provider themselves can read/write their own profile, and administrators can manage all profiles.",
+          "params": [
+            {
+              "name": "serviceProviderId",
+              "description": "The Firebase Authentication UID of the service provider, acting as the document ID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/clients/{clientId}",
+        "definition": {
+          "entityName": "Client",
+          "schema": {
+            "$ref": "#/backend/entities/Client"
+          },
+          "description": "Stores the profile information for a client. The document ID (`clientId`) directly corresponds to the Firebase Authentication UID of the client. This collection defines the 'Client' role for DBAC. Only the client themselves can read/write their own profile, and administrators can manage all profiles.",
+          "params": [
+            {
+              "name": "clientId",
+              "description": "The Firebase Authentication UID of the client, acting as the document ID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/administrators/{administratorId}",
+        "definition": {
+          "entityName": "Administrator",
+          "schema": {
+            "$ref": "#/backend/entities/Administrator"
+          },
+          "description": "Stores the profile information for an internal administrator. The document ID (`administratorId`) directly corresponds to the Firebase Authentication UID of the administrator. This collection defines the 'Administrator' role for DBAC ('Existence over Content'). Only administrators can read/write their own profiles, and potentially super-admins manage all profiles.",
+          "params": [
+            {
+              "name": "administratorId",
+              "description": "The Firebase Authentication UID of the administrator, acting as the document ID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/serviceJobs/{serviceJobId}",
+        "definition": {
+          "entityName": "ServiceJob",
+          "schema": {
+            "$ref": "#/backend/entities/ServiceJob"
+          },
+          "description": "Stores details for each cleaning service job. Documents include denormalized `clientId` and `serviceProviderId` fields for authorization independence, allowing direct security rule checks (e.g., `request.auth.uid == resource.data.clientId` or `request.auth.uid == resource.data.serviceProviderId`) without `get()` calls. This enables secure queries for clients and service providers to list their relevant jobs.",
+          "params": [
+            {
+              "name": "serviceJobId",
+              "description": "The unique identifier for the service job."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/serviceProviders/{serviceProviderId}/scheduleEntries/{scheduleEntryId}",
+        "definition": {
+          "entityName": "ScheduleEntry",
+          "schema": {
+            "$ref": "#/backend/entities/ScheduleEntry"
+          },
+          "description": "Stores individual schedule entries (jobs, availability, blocked time) for a specific service provider. Ownership is established by the path segment `serviceProviderId`, which directly maps to the `request.auth.uid` for authorization independence. This ensures that only the relevant service provider or an administrator can access these entries.",
+          "params": [
+            {
+              "name": "serviceProviderId",
+              "description": "The Firebase Authentication UID of the service provider whose schedule this entry belongs to."
+            },
+            {
+              "name": "scheduleEntryId",
+              "description": "The unique identifier for the schedule entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/clients/{clientId}/invoices/{invoiceId}",
+        "definition": {
+          "entityName": "Invoice",
+          "schema": {
+            "$ref": "#/backend/entities/Invoice"
+          },
+          "description": "Stores invoices issued to a specific client. Ownership is established by the path segment `clientId`, which directly maps to the `request.auth.uid` for authorization independence. Only the relevant client or an administrator can access their invoices.",
+          "params": [
+            {
+              "name": "clientId",
+              "description": "The Firebase Authentication UID of the client to whom this invoice is issued."
+            },
+            {
+              "name": "invoiceId",
+              "description": "The unique identifier for the invoice."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/serviceProviders/{serviceProviderId}/payoutTransactions/{payoutTransactionId}",
+        "definition": {
+          "entityName": "PayoutTransaction",
+          "schema": {
+            "$ref": "#/backend/entities/PayoutTransaction"
+          },
+          "description": "Stores payout transactions for a specific service provider. Ownership is established by the path segment `serviceProviderId`, which directly maps to the `request.auth.uid` for authorization independence. Only the relevant service provider or an administrator can access their payout records.",
+          "params": [
+            {
+              "name": "serviceProviderId",
+              "description": "The Firebase Authentication UID of the service provider receiving this payout."
+            },
+            {
+              "name": "payoutTransactionId",
+              "description": "The unique identifier for the payout transaction."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/conversations/{conversationId}",
+        "definition": {
+          "entityName": "Conversation",
+          "schema": {
+            "$ref": "#/backend/entities/Conversation"
+          },
+          "description": "Stores communication threads involving multiple participants (Service Providers, Clients, Administrators). Documents include a denormalized `participantIds` array, which contains the UIDs of all authorized users. This enables authorization independence, allowing direct security rule checks (e.g., `request.auth.uid in resource.data.participantIds`) without `get()` calls.",
+          "params": [
+            {
+              "name": "conversationId",
+              "description": "The unique identifier for the conversation."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/conversations/{conversationId}/messages/{messageId}",
+        "definition": {
+          "entityName": "Message",
+          "schema": {
+            "$ref": "#/backend/entities/Message"
+          },
+          "description": "Stores individual messages within a conversation. Documents include the denormalized `participantIds` array (copied from the parent `Conversation`) for authorization independence. This allows direct security rule checks for message access without requiring a `get()` call to the parent `Conversation` document.",
+          "params": [
+            {
+              "name": "conversationId",
+              "description": "The unique identifier of the parent conversation."
+            },
+            {
+              "name": "messageId",
+              "description": "The unique identifier for the message."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The recommended Firestore data structure prioritizes security, scalability, and debuggability in line with the core design principles. The primary goal is to ensure Authorization Independence, eliminating the need for `get()` calls in security rules, which simplifies rule logic and supports atomic operations like transactions and batch writes. This is achieved through strategic denormalization and structural segregation.\n\n1.  **Authorization Independence & Denormalization:**\n    *   **User Roles:** Separate top-level collections (`/serviceProviders`, `/clients`, `/administrators`) are used to segregate different user types. The document ID for each user is their Firebase `request.auth.uid`. The mere existence of a document in these collections acts as a direct, database-driven access control (DBAC) mechanism, defining their primary role without custom claims.\n    *   **Shared Entities (`ServiceJob`, `Conversation`, `Message`):** For entities accessed by multiple user types (e.g., `ServiceJob` by `Client` and `ServiceProvider`), critical authorization fields are denormalized directly into the document. `ServiceJob` documents will explicitly contain `clientId` and `serviceProviderId` fields. `Conversation` documents will contain a `participantIds` array. `Message` documents, being a subcollection of `Conversation`, will also denormalize the `participantIds` from their parent `Conversation` to allow atomic and independent authorization checks. This ensures that a user's access can be determined by directly comparing `request.auth.uid` against these fields within the `resource.data` of the document itself, without needing to `get()` a parent or related document.\n    *   **User-Owned Subcollections:** For data intrinsically owned by a single user (e.g., `ScheduleEntry` by `ServiceProvider`, `Invoice` by `Client`, `PayoutTransaction` by `ServiceProvider`), hierarchical paths are used (e.g., `/serviceProviders/{serviceProviderId}/scheduleEntries`). Here, `serviceProviderId` or `clientId` in the path segment directly corresponds to `request.auth.uid`, achieving authorization independence naturally.\n\n2.  **QAPs (Query, Access, Performance, Security) for Secure `list` Operations:**\n    *   **Path-Based Ownership:** For subcollections like `/serviceProviders/{serviceProviderId}/scheduleEntries` or `/clients/{clientId}/invoices`, `list` operations are inherently secure. Security rules can enforce that `serviceProviderId` or `clientId` in the path must match `request.auth.uid`, ensuring users only list their own data.\n    *   **Denormalized Authorization Fields:** For collections like `/serviceJobs` and `/conversations`, the denormalized `clientId`, `serviceProviderId`, and `participantIds` fields enable secure `list` queries. Rules can ensure that a `list` operation is only allowed if a filter (`where` clause) includes `clientId == request.auth.uid` (for clients), `serviceProviderId == request.auth.uid` (for service providers), or `request.auth.uid in participantIds` (for conversations). Administrators, whose `uid` exists in `/administrators`, would have broader `list` permissions across all collections.\n    *   **Structural Segregation:** Separating entities with different security postures into distinct collections (e.g., all `ServiceProviders` in one collection, all `Clients` in another) significantly simplifies security rules, as rules can be applied uniformly to an entire collection rather than needing complex conditional logic within a single mixed collection.\n\nThis design leverages Firebase Authentication for user identity (email/password, Google OAuth) and then uses the `request.auth.uid` to map directly to dedicated user profile documents and to enforce granular access across all data entities, ensuring a robust, easily debuggable, and scalable security model."
   }
 }

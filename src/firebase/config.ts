@@ -1,16 +1,8 @@
-
-'use client';
-
-/**
- * @fileOverview Firebase configuration object.
- * Uses environment variables for the API key to ensure security and flexibility across environments.
- */
-
 export const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: "studio-3673070449-f277c.firebaseapp.com",
-  projectId: "studio-3673070449-f277c",
-  storageBucket: "studio-3673070449-f277c.firebasestorage.app",
-  messagingSenderId: "3673070449",
-  appId: "1:3673070449:web:531610e238977c0594314c"
+  "projectId": "studio-3673070449-f277c",
+  "appId": "1:918212352467:web:3a704f0e02034084c83726",
+  "apiKey": "AIzaSyAuH64vGAgWc-t4YKe91df8GuJ7lfzU6oo",
+  "authDomain": "studio-3673070449-f277c.firebaseapp.com",
+  "measurementId": "",
+  "messagingSenderId": "918212352467"
 };

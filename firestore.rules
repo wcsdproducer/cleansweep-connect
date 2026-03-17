@@ -1,50 +1,191 @@
-
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper functions
+
+    /**
+     * NATIONAL CLEANING COMPANY - SECURITY RULES CONFIGURATION
+     * 
+     * CORE PHILOSOPHY:
+     * This ruleset implements a strict "Authorization Independence" model. Access decisions are 
+     * driven by the authenticated user's UID (request.auth.uid) compared against document paths 
+     * or denormalized identity fields within the documents themselves. This minimizes the need 
+     * for cross-document lookups (get() calls), ensuring high performance and clear ownership.
+     * 
+     * DATA STRUCTURE & ROLES:
+     * - /serviceProviders/{uid}: Profiles for cleaning staff. UID in path defines ownership.
+     * - /clients/{uid}: Profiles for customers. UID in path defines ownership.
+     * - /administrators/{uid}: Internal staff profiles. Existence here defines the 'Admin' role.
+     * - Shared Entities: Documents like ServiceJobs and Conversations use denormalized UID 
+     *   fields (clientId, serviceProviderId, participantIds) to grant access to multiple parties.
+     * 
+     * KEY SECURITY DECISIONS:
+     * 1. DBAC (Database-driven Access Control): User roles are determined by their existence 
+     *    within the specific profile collections.
+     * 2. Path-Based Security: Sub-collections (Invoices, Schedules) are nested under the 
+     *    owner's profile path, making authorization checks simple and query-safe.
+     * 3. Prototyping Flexibility: While authorization is strictly enforced (who can access), 
+     *    the specific shape of the data (schema) is kept flexible to allow for rapid iteration.
+     * 4. Relational Integrity: On creation, we enforce that identity fields in the data 
+     *    match the authenticated user to prevent "identity spoofing."
+     */
+
+    // --- Helper Functions ---
+
+    /** @description Checks if the request is from a signed-in user. */
     function isSignedIn() {
       return request.auth != null;
     }
-    
+
+    /** @description Checks if the user is an internal administrator. */
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/administrators/$(request.auth.uid));
+    }
+
+    /** @description Checks if the provided UID matches the current authenticated user. */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // User profiles: Users can only manage their own profile
-    match /users/{userId} {
-      allow read, write: if isOwner(userId);
+    /** @description Checks ownership for existing documents (updates/deletes). */
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
     }
 
-    // Service Provider registration: Providers can manage their own application
-    match /serviceProviders/{providerId} {
-      allow read, write: if isOwner(providerId);
+    /** @description Checks if the user is a participant in a shared list. */
+    function isParticipant(participantIds) {
+      return isSignedIn() && request.auth.uid in participantIds;
     }
 
-    // Provider Coverage: Providers manage their own service area
-    match /provider_coverage/{providerId} {
-      allow read, write: if isOwner(providerId);
+    /** @description Checks if the user is the client or provider on a job. */
+    function isJobStakeholder(data) {
+      return isSignedIn() && (request.auth.uid == data.clientId || request.auth.uid == data.serviceProviderId);
     }
 
-    // Jobs: For MVP, allowing authenticated users to manage jobs
-    match /jobs/{jobId} {
-      allow read, write: if isSignedIn();
+    // --- Collection Rules ---
+
+    /**
+     * @description Rules for Service Provider profiles.
+     * @path /serviceProviders/{serviceProviderId}
+     * @allow (create) User creates a profile where the doc ID matches their Auth UID.
+     * @deny (read) User A tries to read User B's private profile.
+     * @principle Ownership via Path and Admin override.
+     */
+    match /serviceProviders/{serviceProviderId} {
+      allow get: if isOwner(serviceProviderId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(serviceProviderId);
+      allow update: if isExistingOwner(serviceProviderId) || isAdmin();
+      allow delete: if isAdmin();
+
+      /**
+       * @description Rules for provider-specific schedule entries.
+       * @path /serviceProviders/{serviceProviderId}/scheduleEntries/{scheduleEntryId}
+       * @allow (list) Provider lists their own schedule.
+       * @deny (create) Provider A tries to add a schedule entry for Provider B.
+       * @principle Path-based ownership inheritance.
+       */
+      match /scheduleEntries/{scheduleEntryId} {
+        allow get, list: if isOwner(serviceProviderId) || isAdmin();
+        allow create: if isOwner(serviceProviderId) && request.resource.data.serviceProviderId == serviceProviderId;
+        allow update: if isExistingOwner(serviceProviderId) || isAdmin();
+        allow delete: if isExistingOwner(serviceProviderId) || isAdmin();
+      }
+
+      /**
+       * @description Rules for provider payouts.
+       * @path /serviceProviders/{serviceProviderId}/payoutTransactions/{payoutTransactionId}
+       * @allow (get) Provider views their payout details.
+       * @deny (write) Provider tries to create or delete their own payout record (Admin only).
+       * @principle Read-only for owners, full control for Admins.
+       */
+      match /payoutTransactions/{payoutTransactionId} {
+        allow get, list: if isOwner(serviceProviderId) || isAdmin();
+        allow create, update, delete: if isAdmin();
+      }
     }
 
-    // Messages: For MVP, allowing authenticated users to chat
-    match /messages/{messageId} {
-      allow read, write: if isSignedIn();
+    /**
+     * @description Rules for Client profiles.
+     * @path /clients/{clientId}
+     * @allow (update) Client updates their own contact information.
+     * @deny (delete) Client tries to delete their own account (Admin only).
+     * @principle Self-creation and Admin management.
+     */
+    match /clients/{clientId} {
+      allow get: if isOwner(clientId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(clientId);
+      allow update: if isExistingOwner(clientId) || isAdmin();
+      allow delete: if isAdmin();
+
+      /**
+       * @description Rules for client invoices.
+       * @path /clients/{clientId}/invoices/{invoiceId}
+       * @allow (get) Client views their invoice.
+       * @deny (create) Client tries to generate their own invoice.
+       * @principle Read-only for owners, Admin managed financial data.
+       */
+      match /invoices/{invoiceId} {
+        allow get, list: if isOwner(clientId) || isAdmin();
+        allow create, update, delete: if isAdmin();
+      }
     }
 
-    // Invoices: For MVP, allowing authenticated users to manage billing
-    match /invoices/{invoiceId} {
-      allow read, write: if isSignedIn();
+    /**
+     * @description Rules for internal Administrator profiles.
+     * @path /administrators/{administratorId}
+     * @allow (get) Admin reads their own profile.
+     * @deny (create) Unauthenticated user tries to register as an admin.
+     * @principle Existence in this collection defines Admin role; creation restricted.
+     */
+    match /administrators/{administratorId} {
+      allow get: if isOwner(administratorId) || isAdmin();
+      allow list: if isAdmin();
+      allow create, update, delete: if isAdmin(); // Usually managed by SuperAdmin/CLI
     }
-    
-    // Default fallback
-    match /{document=**} {
-      allow read, write: if false;
+
+    /**
+     * @description Rules for Service Jobs shared between Clients and Providers.
+     * @path /serviceJobs/{serviceJobId}
+     * @allow (get) The assigned provider or the requesting client views the job.
+     * @deny (list) User tries to list all jobs without filtering by their own ID.
+     * @principle Shared access via denormalized fields.
+     */
+    match /serviceJobs/{serviceJobId} {
+      allow get: if isJobStakeholder(resource.data) || isAdmin();
+      allow list: if isAdmin() || (isSignedIn() && (request.query.limit <= 100 && (request.auth.uid == resource.data.clientId || request.auth.uid == resource.data.serviceProviderId)));
+      allow create: if isAdmin() || (isSignedIn() && (request.resource.data.clientId == request.auth.uid || request.resource.data.serviceProviderId == request.auth.uid));
+      allow update: if isJobStakeholder(resource.data) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    /**
+     * @description Rules for group Conversations.
+     * @path /conversations/{conversationId}
+     * @allow (get) Participant listed in the IDs array reads the thread.
+     * @deny (update) Participant tries to remove others from the conversation.
+     * @principle Multi-party access via participant array.
+     */
+    match /conversations/{conversationId} {
+      allow get: if isParticipant(resource.data.participantIds) || isAdmin();
+      allow list: if isSignedIn(); // Filtering happens on the client: .where('participantIds', 'array-contains', uid)
+      allow create: if isParticipant(request.resource.data.participantIds) || isAdmin();
+      allow update: if isParticipant(resource.data.participantIds) || isAdmin();
+      allow delete: if isAdmin();
+
+      /**
+       * @description Rules for messages within a conversation.
+       * @path /conversations/{conversationId}/messages/{messageId}
+       * @allow (create) Participant sends a message to the thread.
+       * @deny (read) Non-participant tries to read message history.
+       * @principle Denormalized participant list for independent authorization.
+       */
+      match /messages/{messageId} {
+        allow get, list: if isParticipant(resource.data.participantIds) || isAdmin();
+        allow create: if isParticipant(request.resource.data.participantIds) && request.resource.data.senderId == request.auth.uid;
+        allow update: if isAdmin(); // Messages generally immutable for users
+        allow delete: if isAdmin();
+      }
     }
   }
 }
