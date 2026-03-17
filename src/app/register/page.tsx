@@ -66,12 +66,12 @@ export default function Register() {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
 
-      // 2. Create User Profile with Role
+      // 2. Create User Profile with explicit Service Provider Role
       const userDocRef = doc(db, 'users', user.uid);
       const userData = {
         uid: user.uid,
         email: formData.email,
-        role: 'Service Provider',
+        role: 'Service Provider', // Mandatory assignment
         firstName: formData.firstName,
         lastName: formData.lastName,
         createdAt: serverTimestamp(),

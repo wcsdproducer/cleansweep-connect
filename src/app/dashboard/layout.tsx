@@ -23,16 +23,20 @@ export default function DashboardLayout({
   );
 
   useEffect(() => {
+    // Redirect if not logged in
     if (!userLoading && !user) {
       router.push('/login');
     }
   }, [user, userLoading, router]);
 
   useEffect(() => {
-    if (!docLoading && userData && userData.role !== 'Service Provider') {
-      router.push('/login');
+    // Redirect if role is incorrect or user document is missing
+    if (!docLoading && user) {
+      if (!userData || userData.role !== 'Service Provider') {
+        router.push('/login');
+      }
     }
-  }, [userData, docLoading, router]);
+  }, [userData, docLoading, user, router]);
 
   if (userLoading || docLoading) {
     return (
@@ -46,7 +50,7 @@ export default function DashboardLayout({
   }
 
   // Final check to prevent flicker before redirect
-  if (!user || (userData && userData.role !== 'Service Provider')) {
+  if (!user || !userData || userData.role !== 'Service Provider') {
     return null;
   }
 
