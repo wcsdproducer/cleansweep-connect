@@ -3,27 +3,15 @@
   "placeholderImages": [
     {
       "id": "hero-cleaning",
-      "description": "Professional cleaner in uniform smiling",
-      "imageUrl": "https://picsum.photos/seed/clean1/1200/600",
-      "imageHint": "professional cleaner"
-    },
-    {
-      "id": "office-cleaning",
-      "description": "A clean modern office space",
-      "imageUrl": "https://picsum.photos/seed/clean2/600/400",
-      "imageHint": "clean office"
+      "description": "CleanSweep Business Owner",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/studio-3673070449-f277c.firebasestorage.app/o/Images%2FCleanSweep%20-%20Business%20Owner.png?alt=media&token=4cd7330d-3ae2-40db-aa80-3fb5187700c4",
+      "imageHint": "cleaning business"
     },
     {
       "id": "team-cleaning",
-      "description": "Group of professional cleaners with equipment",
-      "imageUrl": "https://picsum.photos/seed/clean3/600/400",
+      "description": "Professional cleaning team",
+      "imageUrl": "https://picsum.photos/seed/team1/1200/800",
       "imageHint": "cleaning team"
-    },
-    {
-      "id": "equipment",
-      "description": "Modern cleaning supplies and equipment",
-      "imageUrl": "https://picsum.photos/seed/clean4/400/300",
-      "imageHint": "cleaning supplies"
     }
   ]
 }
