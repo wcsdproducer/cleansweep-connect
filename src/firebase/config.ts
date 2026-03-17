@@ -1,10 +1,12 @@
-
 'use client';
 
-// The Firebase configuration is provided via environment variables.
-// These variables are automatically injected by the Firebase Studio environment.
+/**
+ * @fileOverview Firebase configuration object.
+ * Uses environment variables for the API key to ensure security and flexibility across environments.
+ */
+
 export const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSy...", 
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: "studio-3673070449-f277c.firebaseapp.com",
   projectId: "studio-3673070449-f277c",
   storageBucket: "studio-3673070449-f277c.firebasestorage.app",
