@@ -2,7 +2,7 @@
 'use client';
 
 export const firebaseConfig = {
-  apiKey: "AIzaSy...", // Placeholder - fetched from server in production
+  apiKey: "AIzaSy...", // Placeholder - usually injected by the environment or fetched from server
   authDomain: "studio-3673070449-f277c.firebaseapp.com",
   projectId: "studio-3673070449-f277c",
   storageBucket: "studio-3673070449-f277c.firebasestorage.app",

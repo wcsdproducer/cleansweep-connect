@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -10,7 +11,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowRight, ArrowLeft, ShieldCheck, Eye, EyeOff, Lock, Mail, User, Phone, MapPin } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { useFirestore, useAuth } from '@/firebase';
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -113,14 +114,18 @@ export default function Register() {
       await signInWithPopup(auth, provider);
       // Step 2 will be triggered by onAuthStateChanged
     } catch (error: any) {
-      console.error("Google Signup Error:", error);
-      if (error.code !== 'auth/popup-closed-by-user') {
+      console.error("Google Auth Error:", error);
+      if (error.code === 'auth/unauthorized-domain') {
+        toast({
+          variant: "destructive",
+          title: "Unauthorized Domain",
+          description: "Please add this domain to your Authorized Domains in the Firebase Console.",
+        });
+      } else if (error.code !== 'auth/popup-closed-by-user') {
         toast({
           variant: "destructive",
           title: "Google Login Failed",
-          description: error.code === 'auth/unauthorized-domain' 
-            ? "This domain is not authorized. Please add it to your Firebase Console."
-            : error.message,
+          description: error.message,
         });
       }
     } finally {
