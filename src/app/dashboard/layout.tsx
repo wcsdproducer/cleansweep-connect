@@ -36,10 +36,9 @@ export default function DashboardLayout({
       } else if (userData) {
         // Logged in but not a provider
         router.push('/login');
-      } else if (!isDocLoading) {
-        // User exists in Auth but not in Firestore 'users' collection
-        // This could happen if registration was interrupted
-        setIsAuthorized(true); // Allow them to see the dashboard, or redirect to profile completion
+      } else {
+        // Handle case where user exists in Auth but not Firestore yet
+        setIsAuthorized(true); 
       }
     }
   }, [userData, isDocLoading, user, router]);
@@ -50,8 +49,8 @@ export default function DashboardLayout({
         <div className="flex flex-col items-center gap-6 p-10 bg-white rounded-[3rem] shadow-2xl border">
           <div className="w-16 h-16 border-8 border-primary border-t-transparent rounded-full animate-spin" />
           <div className="text-center">
-            <h3 className="text-2xl font-bold text-primary">Securing Session</h3>
-            <p className="text-sm text-muted-foreground font-medium mt-1">Verifying your professional credentials...</p>
+            <h3 className="text-2xl font-bold text-primary">Verifying Access</h3>
+            <p className="text-sm text-muted-foreground font-medium mt-1">Please wait while we secure your session...</p>
           </div>
         </div>
       </div>

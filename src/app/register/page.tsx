@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -9,10 +9,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ShieldCheck, Eye, EyeOff, Lock, Mail, ChevronRight, ChevronLeft, Sparkles } from 'lucide-react';
+import { ShieldCheck, Eye, EyeOff, Lock, Mail, ChevronRight, Sparkles, MapPin, Phone, User } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { useFirestore, useAuth } from '@/firebase';
 import { useRouter } from 'next/navigation';
 
@@ -36,45 +36,60 @@ export default function Register() {
     consentedToBackground: false,
   });
 
-  // Handle step transitions and auth listener
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && step === 1) {
-        setStep(2);
-      }
-    });
-    return () => unsubscribe();
-  }, [auth, step]);
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
   };
 
-  const handleAuthSubmit = async (e: React.FormEvent) => {
+  const initializeUserProfile = async (uid: string, email: string, firstName: string, lastName: string) => {
+    if (!db) return;
+    
+    // Create Role-Based Access Control document
+    await setDoc(doc(db, 'users', uid), {
+      uid,
+      email,
+      role: 'Service Provider',
+      firstName,
+      lastName,
+      createdAt: serverTimestamp(),
+    });
+
+    // Create Service Provider specific profile
+    await setDoc(doc(db, 'serviceProviders', uid), {
+      id: uid,
+      email,
+      firstName,
+      lastName,
+      phoneNumber: formData.phone || '',
+      addressCity: formData.city || '',
+      status: 'pending_approval',
+      registrationDate: new Date().toISOString(),
+    });
+  };
+
+  const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!auth) return;
     
     if (formData.password !== formData.confirmPassword) {
-      toast({ variant: "destructive", title: "Passwords Mismatch", description: "The passwords you entered do not match." });
+      toast({ variant: "destructive", title: "Passwords Mismatch", description: "The passwords do not match." });
       return;
     }
 
     setLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-      // step 2 is triggered by useEffect listener
+      const result = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      if (result.user) {
+        setStep(2); // Move to profile details
+      }
     } catch (error: any) {
       console.error("Signup Error:", error);
-      let message = "Could not create account. Please check your project settings.";
+      let message = "Could not create account. Please check Identity Toolkit API status.";
       if (error.code === 'auth/email-already-in-use') message = "This email is already registered.";
-      if (error.message?.includes('signup-are-blocked')) {
-        message = "Signup is currently blocked. Please ensure Identity Toolkit API is enabled in Google Cloud Console.";
-      }
       
       toast({
         variant: "destructive",
-        title: "Registration Failed",
+        title: "Registration Error",
         description: message,
       });
     } finally {
@@ -83,15 +98,21 @@ export default function Register() {
   };
 
   const handleGoogleSignup = async () => {
-    if (!auth) return;
+    if (!auth || !db) return;
     setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      if (result.user) {
+        // For Google users, we might already have their name
+        const [first, ...rest] = (result.user.displayName || "").split(" ");
+        await initializeUserProfile(result.user.uid, result.user.email!, first, rest.join(" "));
+        router.push("/dashboard");
+      }
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Google Sign-In Failed",
+        title: "Google Error",
         description: error.message,
       });
     } finally {
@@ -104,48 +125,26 @@ export default function Register() {
     if (!auth?.currentUser || !db) return;
 
     if (!formData.agreedToTerms || !formData.consentedToBackground) {
-      toast({ variant: "destructive", title: "Agreement Required", description: "You must agree to all terms." });
+      toast({ variant: "destructive", title: "Agreement Required", description: "Please accept the terms and background check." });
       return;
     }
 
     setLoading(true);
-    const uid = auth.currentUser.uid;
-    const email = auth.currentUser.email!;
-
     try {
-      // Create user record for RBAC
-      await setDoc(doc(db, 'users', uid), {
-        uid,
-        email,
-        role: 'Service Provider',
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        createdAt: serverTimestamp(),
-      });
+      await initializeUserProfile(
+        auth.currentUser.uid, 
+        auth.currentUser.email!, 
+        formData.firstName, 
+        formData.lastName
+      );
 
-      // Create service provider record
-      await setDoc(doc(db, 'serviceProviders', uid), {
-        id: uid,
-        email,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        phoneNumber: formData.phone,
-        addressCity: formData.city,
-        status: 'pending_approval',
-        registrationDate: new Date().toISOString(),
-      });
-
-      toast({
-        title: "Application Submitted",
-        description: "Welcome to CleanSweep! Redirecting to your dashboard...",
-      });
+      toast({ title: "Success!", description: "Welcome to CleanSweep!" });
       router.push("/dashboard");
     } catch (error: any) {
-      console.error("Firestore Save Error:", error);
       toast({
         variant: "destructive",
-        title: "Profile Save Error",
-        description: "Your account was created but we couldn't save your details. Please try again.",
+        title: "Profile Error",
+        description: "Account created but profile failed to save.",
       });
     } finally {
       setLoading(false);
@@ -175,22 +174,22 @@ export default function Register() {
               </div>
             </div>
             <CardTitle className="text-2xl text-primary font-bold">
-              {step === 1 ? "Start Your Journey" : "Complete Your Profile"}
+              {step === 1 ? "Partner Registration" : "Profile Details"}
             </CardTitle>
-            <CardDescription className="font-medium text-base">
-              {step === 1 ? "Create your professional account today." : "Tell us a bit more to get approved."}
+            <CardDescription className="font-medium">
+              {step === 1 ? "Secure your spot in the CleanSweep network." : "Tell us about your cleaning business."}
             </CardDescription>
           </CardHeader>
 
           <CardContent className="p-8">
             {step === 1 ? (
-              <form onSubmit={handleAuthSubmit} className="space-y-6">
-                <div className="space-y-4">
+              <div className="space-y-6">
+                <form onSubmit={handleEmailSignup} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="email">Work Email</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input id="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="alex@example.com" className="pl-10 h-12 rounded-xl" required />
+                      <Input id="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="name@company.com" className="pl-10 h-12 rounded-xl" required />
                     </div>
                   </div>
                   <div className="grid sm:grid-cols-2 gap-4">
@@ -209,29 +208,31 @@ export default function Register() {
                       <Input id="confirmPassword" type={showPassword ? "text" : "password"} value={formData.confirmPassword} onChange={handleInputChange} className="h-12 rounded-xl" required />
                     </div>
                   </div>
-                </div>
-
-                <Button type="submit" disabled={loading} className="w-full h-14 bg-primary text-white hover:bg-primary/90 rounded-2xl font-bold text-lg shadow-xl shadow-primary/20">
-                  {loading ? "Initializing..." : "Register with Email"}
-                  <ChevronRight className="ml-2 w-5 h-5" />
-                </Button>
+                  <Button type="submit" disabled={loading} className="w-full h-14 bg-primary text-white hover:bg-primary/90 rounded-2xl font-bold text-lg shadow-xl shadow-primary/20">
+                    {loading ? "Creating Account..." : "Create Account"}
+                    <ChevronRight className="ml-2 w-5 h-5" />
+                  </Button>
+                </form>
 
                 <div className="relative py-2">
                   <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-                  <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-4 text-muted-foreground font-bold">Or continue with</span></div>
+                  <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-4 text-muted-foreground font-bold">Or Instant Join</span></div>
                 </div>
 
-                <Button type="button" variant="outline" onClick={handleGoogleSignup} disabled={loading} className="w-full h-14 rounded-2xl border-primary/20 font-bold text-lg hover:bg-primary/5">
+                <Button variant="outline" onClick={handleGoogleSignup} disabled={loading} className="w-full h-14 rounded-2xl border-primary/20 font-bold text-lg hover:bg-primary/5">
                   <Image src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width={20} height={20} className="mr-3" />
-                  Google Account
+                  Sign up with Google
                 </Button>
-              </form>
+              </div>
             ) : (
               <form onSubmit={handleFinalSubmit} className="space-y-6">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name</Label>
-                    <Input id="firstName" value={formData.firstName} onChange={handleInputChange} className="h-12 rounded-xl" required />
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input id="firstName" value={formData.firstName} onChange={handleInputChange} className="pl-10 h-12 rounded-xl" required />
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="lastName">Last Name</Label>
@@ -241,11 +242,17 @@ export default function Register() {
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number</Label>
-                    <Input id="phone" value={formData.phone} onChange={handleInputChange} className="h-12 rounded-xl" required />
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input id="phone" value={formData.phone} onChange={handleInputChange} className="pl-10 h-12 rounded-xl" required />
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="city">Primary City</Label>
-                    <Input id="city" value={formData.city} onChange={handleInputChange} className="h-12 rounded-xl" required />
+                    <Label htmlFor="city">Service City</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input id="city" value={formData.city} onChange={handleInputChange} className="pl-10 h-12 rounded-xl" required />
+                    </div>
                   </div>
                 </div>
                 
@@ -253,26 +260,26 @@ export default function Register() {
                   <div className="flex items-start space-x-3">
                     <Checkbox id="terms" checked={formData.agreedToTerms} onCheckedChange={(c) => setFormData(p => ({ ...p, agreedToTerms: !!c }))} />
                     <Label htmlFor="terms" className="text-sm font-medium leading-tight cursor-pointer">
-                      I agree to the <Link href="#" className="text-primary font-bold hover:underline">Terms of Service</Link> and Provider Agreement.
+                      I agree to the <Link href="#" className="text-primary font-bold hover:underline">Terms of Service</Link>.
                     </Label>
                   </div>
                   <div className="flex items-start space-x-3">
                     <Checkbox id="background" checked={formData.consentedToBackground} onCheckedChange={(c) => setFormData(p => ({ ...p, consentedToBackground: !!c }))} />
                     <Label htmlFor="background" className="text-sm font-medium leading-tight cursor-pointer">
-                      I consent to a professional <span className="font-bold">background check</span> for verification.
+                      I consent to a <span className="font-bold">background check</span> for verification.
                     </Label>
                   </div>
                 </div>
 
                 <Button type="submit" disabled={loading} className="w-full h-14 bg-accent text-accent-foreground hover:bg-accent/90 rounded-2xl font-bold text-lg shadow-xl shadow-accent/20">
-                  {loading ? "Saving Profile..." : "Submit Application"}
+                  {loading ? "Submitting Application..." : "Submit Application"}
                 </Button>
               </form>
             )}
           </CardContent>
           <CardFooter className="p-8 pt-0 flex justify-center border-t bg-secondary/5 mt-4">
             <p className="text-sm text-muted-foreground font-medium pt-6">
-              Already have a Pro account? <Link href="/login" className="text-primary font-bold hover:underline">Log in here</Link>
+              Already registered? <Link href="/login" className="text-primary font-bold hover:underline">Log in here</Link>
             </p>
           </CardFooter>
         </Card>
