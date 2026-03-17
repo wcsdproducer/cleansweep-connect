@@ -72,11 +72,11 @@ export default function Register() {
 
   const validateAuthStep = () => {
     if (!formData.email || !formData.password || !formData.confirmPassword) {
-      toast({ variant: "destructive", title: "Required", description: "Please fill in all authentication fields." });
+      toast({ variant: "destructive", title: "Required Fields", description: "Please fill in all authentication fields." });
       return false;
     }
     if (formData.password !== formData.confirmPassword) {
-      toast({ variant: "destructive", title: "Mismatch", description: "Passwords do not match." });
+      toast({ variant: "destructive", title: "Password Mismatch", description: "Passwords do not match." });
       return false;
     }
     if (formData.password.length < 6) {
@@ -86,20 +86,25 @@ export default function Register() {
     return true;
   };
 
-  const handleAuthSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!auth || !validateAuthStep()) return;
+  const handleAuthSubmit = async () => {
+    if (!auth) {
+      toast({ variant: "destructive", title: "Error", description: "Authentication service is not available." });
+      return;
+    }
+    
+    if (!validateAuthStep()) return;
 
     setLoading(true);
     try {
       await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-      // Step 2 will be triggered by onAuthStateChanged
+      // Step 2 will be triggered by onAuthStateChanged listener
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Registration Failed",
-        description: error.message,
+        description: error.message || "An unexpected error occurred. Please try again.",
       });
+      console.error("Auth Error:", error);
     } finally {
       setLoading(false);
     }
@@ -112,7 +117,7 @@ export default function Register() {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
       await signInWithPopup(auth, provider);
-      // Step 2 will be triggered by onAuthStateChanged
+      // Step 2 will be triggered by onAuthStateChanged listener
     } catch (error: any) {
       console.error("Google Auth Error:", error);
       if (error.code === 'auth/unauthorized-domain') {
@@ -133,17 +138,17 @@ export default function Register() {
     }
   };
 
-  const handleStep2Submit = async () => {
+  const handleStep2Submit = () => {
     if (!formData.firstName || !formData.lastName || !formData.phone || !formData.city) {
-      toast({ variant: "destructive", title: "Required", description: "Please fill in all profile fields." });
+      toast({ variant: "destructive", title: "Required Fields", description: "Please fill in all profile fields." });
       return;
     }
     setStep(3);
   };
 
-  const handleStep3Submit = async () => {
+  const handleStep3Submit = () => {
     if (!formData.experience || !formData.teamSize || formData.expertise.length === 0) {
-      toast({ variant: "destructive", title: "Required", description: "Please provide your experience details." });
+      toast({ variant: "destructive", title: "Required Fields", description: "Please provide your experience and expertise." });
       return;
     }
     setStep(4);
@@ -194,7 +199,7 @@ export default function Register() {
 
       toast({
         title: "Success!",
-        description: "Your provider profile is being reviewed.",
+        description: "Your provider profile is being reviewed. Welcome to CleanSweep!",
       });
       router.push("/dashboard");
     } catch (error: any) {
@@ -443,25 +448,25 @@ export default function Register() {
               )}
               
               {step === 1 && (
-                <Button onClick={handleAuthSubmit} disabled={loading} className="bg-primary px-8 h-12 rounded-xl font-bold shadow-lg shadow-primary/20">
+                <Button type="button" onClick={handleAuthSubmit} disabled={loading} className="bg-primary px-8 h-12 rounded-xl font-bold shadow-lg shadow-primary/20">
                   {loading ? "Creating Account..." : "Create Account"}
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               )}
               {step === 2 && (
-                <Button onClick={handleStep2Submit} className="bg-primary px-8 h-12 rounded-xl font-bold">
+                <Button type="button" onClick={handleStep2Submit} className="bg-primary px-8 h-12 rounded-xl font-bold">
                   Next Step
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               )}
               {step === 3 && (
-                <Button onClick={handleStep3Submit} className="bg-primary px-8 h-12 rounded-xl font-bold">
+                <Button type="button" onClick={handleStep3Submit} className="bg-primary px-8 h-12 rounded-xl font-bold">
                   Review & Sign
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               )}
               {step === 4 && (
-                <Button onClick={handleFinalSubmit} disabled={loading} className="bg-primary px-10 h-12 rounded-xl font-bold shadow-xl shadow-primary/30">
+                <Button type="button" onClick={handleFinalSubmit} disabled={loading} className="bg-primary px-10 h-12 rounded-xl font-bold shadow-xl shadow-primary/30">
                   {loading ? "Finalizing..." : "Submit Application"}
                 </Button>
               )}
