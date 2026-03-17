@@ -102,7 +102,6 @@ export default function Register() {
     const userDocRef = doc(db, 'users', uid);
     const providerDocRef = doc(db, 'serviceProviders', uid);
 
-    // Non-blocking writes following guidelines
     setDoc(userDocRef, userData, { merge: true })
       .catch(async (err) => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -121,7 +120,6 @@ export default function Register() {
         }));
       });
       
-    // Seed if necessary, but don't block registration success
     seedDatabaseIfEmpty(db).catch(err => console.warn("Seeding failed", err));
     
     toast({
@@ -199,9 +197,9 @@ export default function Register() {
         </Link>
       </header>
 
-      <main className="flex-1 flex items-center justify-center p-6 bg-secondary/20">
+      <main className="flex-1 flex items-center justify-center p-4 bg-secondary/20">
         <div className="w-full max-w-xl">
-          <div className="flex justify-between items-center mb-8 px-2">
+          <div className="flex justify-between items-center mb-4 px-2">
             {[1, 2, 3].map((s) => (
               <div key={s} className="flex items-center gap-2">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
@@ -219,15 +217,15 @@ export default function Register() {
           </div>
 
           <Card className="shadow-2xl border-none rounded-[2rem] overflow-hidden bg-white">
-            <CardHeader className="bg-primary/5 p-8">
+            <CardHeader className="bg-primary/5 p-5">
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-2xl text-primary font-bold">
+                  <CardTitle className="text-xl text-primary font-bold">
                     {step === 1 && "Account Information"}
                     {step === 2 && "Experience & Services"}
                     {step === 3 && "Final Verification"}
                   </CardTitle>
-                  <CardDescription className="font-medium">
+                  <CardDescription className="text-xs font-medium">
                     {step === 1 && "Create your login or use Google."}
                     {step === 2 && "Share your professional skills."}
                     {step === 3 && "Finalize your application."}
@@ -237,7 +235,7 @@ export default function Register() {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    className="rounded-xl border-primary/20 bg-white hover:bg-primary/5 font-bold flex gap-2"
+                    className="rounded-xl border-primary/20 bg-white hover:bg-primary/5 font-bold h-9 text-xs flex gap-2"
                     onClick={handleGoogleSignup}
                     disabled={loading}
                   >
@@ -247,96 +245,103 @@ export default function Register() {
                       <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                       <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12.16-4.53z" />
                     </svg>
-                    Google Signup
+                    Google
                   </Button>
                 )}
               </div>
             </CardHeader>
             <form onSubmit={handleSubmit}>
-              <CardContent className="p-8 space-y-6">
+              <CardContent className="p-5 pt-4 space-y-4">
                 {step === 1 && (
-                  <div className="grid gap-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="firstName">First Name</Label>
-                        <Input id="firstName" value={formData.firstName} onChange={handleInputChange} placeholder="John" />
+                  <div className="grid gap-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="firstName" className="text-xs">First Name</Label>
+                        <Input id="firstName" value={formData.firstName} onChange={handleInputChange} placeholder="John" className="h-9 text-sm" />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="lastName">Last Name</Label>
-                        <Input id="lastName" value={formData.lastName} onChange={handleInputChange} placeholder="Doe" />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email Address</Label>
-                      <Input id="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="john@example.com" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="password">Password</Label>
-                      <div className="relative">
-                        <Input 
-                          id="password" 
-                          type={showPassword ? "text" : "password"} 
-                          value={formData.password} 
-                          onChange={handleInputChange} 
-                          placeholder="Min 6 characters" 
-                        />
-                        <button 
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
-                        >
-                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </button>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="lastName" className="text-xs">Last Name</Label>
+                        <Input id="lastName" value={formData.lastName} onChange={handleInputChange} placeholder="Doe" className="h-9 text-sm" />
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone Number</Label>
-                      <Input id="phone" type="tel" value={formData.phone} onChange={handleInputChange} placeholder="(555) 000-0000" />
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="email" className="text-xs">Email Address</Label>
+                        <Input id="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="john@example.com" className="h-9 text-sm" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="phone" className="text-xs">Phone Number</Label>
+                        <Input id="phone" type="tel" value={formData.phone} onChange={handleInputChange} placeholder="(555) 000-0000" className="h-9 text-sm" />
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="city">City of Operation</Label>
-                      <Input id="city" value={formData.city} onChange={handleInputChange} placeholder="e.g. Chicago, IL" />
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="password" className="text-xs">Password</Label>
+                        <div className="relative">
+                          <Input 
+                            id="password" 
+                            type={showPassword ? "text" : "password"} 
+                            value={formData.password} 
+                            onChange={handleInputChange} 
+                            placeholder="Min 6 chars" 
+                            className="h-9 text-sm pr-9"
+                          />
+                          <button 
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
+                          >
+                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                          </button>
+                        </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="city" className="text-xs">City of Operation</Label>
+                        <Input id="city" value={formData.city} onChange={handleInputChange} placeholder="e.g. Chicago, IL" className="h-9 text-sm" />
+                      </div>
                     </div>
                   </div>
                 )}
 
                 {step === 2 && (
-                  <div className="grid gap-4">
-                    <div className="space-y-2">
-                      <Label>Expertise</Label>
+                  <div className="grid gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Expertise</Label>
                       <div className="grid grid-cols-2 gap-2">
                         {['Residential', 'Commercial', 'Deep Clean', 'Move In/Out'].map((type) => (
-                          <div key={type} className="flex items-center space-x-2 border p-4 rounded-xl hover:bg-primary/5 cursor-pointer transition-colors">
+                          <div key={type} className="flex items-center space-x-2 border p-3 rounded-xl hover:bg-primary/5 cursor-pointer transition-colors h-11">
                             <Checkbox 
                               id={type} 
                               checked={formData.expertise.includes(type)} 
                               onCheckedChange={() => handleExpertiseChange(type)}
                             />
-                            <label htmlFor={type} className="text-sm font-bold cursor-pointer">
+                            <label htmlFor={type} className="text-xs font-bold cursor-pointer">
                               {type}
                             </label>
                           </div>
                         ))}
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="experience">Years of Experience</Label>
-                      <Input id="experience" type="number" value={formData.experience} onChange={handleInputChange} placeholder="0" min="0" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="teamSize">Team Size</Label>
-                      <Input id="teamSize" type="number" value={formData.teamSize} onChange={handleInputChange} placeholder="1" min="1" />
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="experience" className="text-xs">Years of Experience</Label>
+                        <Input id="experience" type="number" value={formData.experience} onChange={handleInputChange} placeholder="0" min="0" className="h-9 text-sm" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="teamSize" className="text-xs">Team Size</Label>
+                        <Input id="teamSize" type="number" value={formData.teamSize} onChange={handleInputChange} placeholder="1" min="1" className="h-9 text-sm" />
+                      </div>
                     </div>
                   </div>
                 )}
 
                 {step === 3 && (
-                  <div className="grid gap-6">
-                    <div className="p-6 bg-secondary/50 rounded-2xl space-y-3">
-                      <h4 className="font-bold text-primary flex items-center gap-2">
-                        <ShieldCheck className="w-5 h-5" /> Provider Agreement
+                  <div className="grid gap-4">
+                    <div className="p-4 bg-secondary/50 rounded-2xl space-y-2">
+                      <h4 className="font-bold text-sm text-primary flex items-center gap-2">
+                        <ShieldCheck className="w-4 h-4" /> Provider Agreement
                       </h4>
-                      <p className="text-xs text-muted-foreground leading-relaxed">
+                      <p className="text-[10px] text-muted-foreground leading-relaxed">
                         By submitting, you agree to a standard background check and acknowledge independent provider status.
                       </p>
                     </div>
@@ -346,7 +351,7 @@ export default function Register() {
                         checked={formData.agreedToTerms}
                         onCheckedChange={(checked) => setFormData(prev => ({ ...prev, agreedToTerms: !!checked }))}
                       />
-                      <label htmlFor="terms" className="text-sm text-muted-foreground font-medium leading-tight cursor-pointer">
+                      <label htmlFor="terms" className="text-xs text-muted-foreground font-medium leading-tight cursor-pointer">
                         I agree to the <Link href="#" className="text-primary hover:underline">Terms of Service</Link> and <Link href="#" className="text-primary hover:underline">Privacy Policy</Link>.
                       </label>
                     </div>
@@ -356,16 +361,16 @@ export default function Register() {
                         checked={formData.consentedToBackground}
                         onCheckedChange={(checked) => setFormData(prev => ({ ...prev, consentedToBackground: !!checked }))}
                       />
-                      <label htmlFor="background" className="text-sm text-muted-foreground font-medium leading-tight cursor-pointer">
+                      <label htmlFor="background" className="text-xs text-muted-foreground font-medium leading-tight cursor-pointer">
                         I consent to a professional background check.
                       </label>
                     </div>
                   </div>
                 )}
               </CardContent>
-              <CardFooter className="flex justify-between border-t p-8 bg-white">
+              <CardFooter className="flex justify-between border-t p-5 bg-white h-20">
                 {step > 1 ? (
-                  <Button type="button" variant="outline" onClick={() => setStep(s => s - 1)} disabled={loading} className="rounded-xl px-6 h-12">
+                  <Button type="button" variant="outline" onClick={() => setStep(s => s - 1)} disabled={loading} className="rounded-xl px-4 h-10 text-sm">
                     <ArrowLeft className="w-4 h-4 mr-2" /> Back
                   </Button>
                 ) : (
@@ -378,13 +383,13 @@ export default function Register() {
                       if (step === 1 && validateStep1()) setStep(2);
                       else if (step === 2 && validateStep2()) setStep(3);
                     }} 
-                    className="bg-primary rounded-xl px-8 h-12 shadow-lg shadow-primary/20"
+                    className="bg-primary rounded-xl px-6 h-10 text-sm shadow-lg shadow-primary/20"
                   >
                     Next <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 ) : (
-                  <Button type="submit" disabled={loading} className="bg-primary rounded-xl px-10 h-12 shadow-xl shadow-primary/30">
-                    {loading ? "Creating Account..." : "Complete Registration"}
+                  <Button type="submit" disabled={loading} className="bg-primary rounded-xl px-8 h-10 text-sm shadow-xl shadow-primary/30">
+                    {loading ? "Registering..." : "Complete"}
                   </Button>
                 )}
               </CardFooter>
