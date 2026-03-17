@@ -92,7 +92,7 @@ export default function Register() {
     setLoading(true);
     try {
       await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-      // step 2 will be triggered by onAuthStateChanged
+      // Step 2 will be triggered by onAuthStateChanged
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -109,14 +109,18 @@ export default function Register() {
     setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
       await signInWithPopup(auth, provider);
-      // step 2 will be triggered by onAuthStateChanged
+      // Step 2 will be triggered by onAuthStateChanged
     } catch (error: any) {
+      console.error("Google Signup Error:", error);
       if (error.code !== 'auth/popup-closed-by-user') {
         toast({
           variant: "destructive",
           title: "Google Login Failed",
-          description: error.message,
+          description: error.code === 'auth/unauthorized-domain' 
+            ? "This domain is not authorized. Please add it to your Firebase Console."
+            : error.message,
         });
       }
     } finally {

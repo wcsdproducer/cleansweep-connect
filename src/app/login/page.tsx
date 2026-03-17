@@ -30,12 +30,14 @@ export default function LoginPage() {
       const userDoc = await getDoc(doc(db, 'users', uid));
       const userData = userDoc.data();
 
-      if (userData?.role !== 'Service Provider') {
+      if (!userData || userData.role !== 'Service Provider') {
         await signOut(auth);
         toast({
           variant: "destructive",
           title: "Access Denied",
-          description: "This application is restricted to Service Providers. If you are new, please register first.",
+          description: userData 
+            ? "This account is not registered as a Service Provider." 
+            : "No provider profile found. Please register first.",
         });
         return false;
       }
@@ -50,7 +52,7 @@ export default function LoginPage() {
       toast({
         variant: "destructive",
         title: "Verification Error",
-        description: "Could not verify account permissions.",
+        description: "Could not verify account permissions. Please try again.",
       });
       return false;
     }
@@ -80,14 +82,22 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
+      // Force account selection to avoid auto-login with wrong account
+      provider.setCustomParameters({ prompt: 'select_account' });
+      
       const result = await signInWithPopup(auth, provider);
-      await verifyRoleAndRedirect(result.user.uid);
+      if (result.user) {
+        await verifyRoleAndRedirect(result.user.uid);
+      }
     } catch (error: any) {
+      console.error("Google Auth Error:", error);
       if (error.code !== 'auth/popup-closed-by-user') {
         toast({
           variant: "destructive",
           title: "Google Login Failed",
-          description: error.message,
+          description: error.code === 'auth/unauthorized-domain' 
+            ? "This domain is not authorized. Please add it to your Firebase Console."
+            : error.message,
         });
       }
     } finally {
