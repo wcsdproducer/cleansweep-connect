@@ -1,8 +1,7 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import Link from 'link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,7 +42,6 @@ export default function Register() {
     consentedToBackground: false,
   });
 
-  // Track auth state to handle Step 1 completion
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -97,14 +95,13 @@ export default function Register() {
     setLoading(true);
     try {
       await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-      // Step 2 will be triggered by onAuthStateChanged listener
     } catch (error: any) {
+      console.error("Signup Error Detailed:", error);
       toast({
         variant: "destructive",
         title: "Registration Failed",
-        description: error.message || "An unexpected error occurred. Please try again.",
+        description: error.message || "An unexpected error occurred. Please check console.",
       });
-      console.error("Auth Error:", error);
     } finally {
       setLoading(false);
     }
@@ -117,22 +114,13 @@ export default function Register() {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
       await signInWithPopup(auth, provider);
-      // Step 2 will be triggered by onAuthStateChanged listener
     } catch (error: any) {
       console.error("Google Auth Error:", error);
-      if (error.code === 'auth/unauthorized-domain') {
-        toast({
-          variant: "destructive",
-          title: "Unauthorized Domain",
-          description: "Please add this domain to your Authorized Domains in the Firebase Console.",
-        });
-      } else if (error.code !== 'auth/popup-closed-by-user') {
-        toast({
-          variant: "destructive",
-          title: "Google Login Failed",
-          description: error.message,
-        });
-      }
+      toast({
+        variant: "destructive",
+        title: "Google Sign-In Failed",
+        description: error.message,
+      });
     } finally {
       setLoading(false);
     }
@@ -189,17 +177,14 @@ export default function Register() {
     };
 
     try {
-      const userDocRef = doc(db, 'users', uid);
-      const providerDocRef = doc(db, 'serviceProviders', uid);
-
-      await setDoc(userDocRef, userData, { merge: true });
-      await setDoc(providerDocRef, providerData, { merge: true });
+      await setDoc(doc(db, 'users', uid), userData, { merge: true });
+      await setDoc(doc(db, 'serviceProviders', uid), providerData, { merge: true });
 
       seedDatabaseIfEmpty(db).catch(err => console.warn("Seeding failed", err));
 
       toast({
         title: "Success!",
-        description: "Your provider profile is being reviewed. Welcome to CleanSweep!",
+        description: "Your provider profile is being reviewed.",
       });
       router.push("/dashboard");
     } catch (error: any) {
@@ -248,22 +233,18 @@ export default function Register() {
 
           <Card className="shadow-2xl border-none rounded-[2rem] overflow-hidden bg-white">
             <CardHeader className="bg-primary/5 p-6 border-b">
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-xl text-primary font-bold">
-                    {step === 1 && "Start Your Journey"}
-                    {step === 2 && "Profile Basics"}
-                    {step === 3 && "Professional Skills"}
-                    {step === 4 && "Final Review"}
-                  </CardTitle>
-                  <CardDescription className="text-sm font-medium">
-                    {step === 1 && "Create your provider login credentials."}
-                    {step === 2 && "Tell us who you are and where you work."}
-                    {step === 3 && "Showcase your professional background."}
-                    {step === 4 && "Agree to our terms and conditions."}
-                  </CardDescription>
-                </div>
-              </div>
+              <CardTitle className="text-xl text-primary font-bold">
+                {step === 1 && "Start Your Journey"}
+                {step === 2 && "Profile Basics"}
+                {step === 3 && "Professional Skills"}
+                {step === 4 && "Final Review"}
+              </CardTitle>
+              <CardDescription className="text-sm font-medium">
+                {step === 1 && "Create your provider login credentials."}
+                {step === 2 && "Tell us who you are and where you work."}
+                {step === 3 && "Showcase your professional background."}
+                {step === 4 && "Agree to our terms and conditions."}
+              </CardDescription>
             </CardHeader>
 
             <CardContent className="p-8 space-y-6">
@@ -324,12 +305,6 @@ export default function Register() {
                     onClick={handleGoogleSignup}
                     disabled={loading}
                   >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24">
-                      <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                      <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                      <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                      <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12.16-4.53z" />
-                    </svg>
                     Continue with Google
                   </Button>
                 </div>
@@ -340,32 +315,20 @@ export default function Register() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="firstName">First Name</Label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input id="firstName" value={formData.firstName} onChange={handleInputChange} placeholder="Alex" className="pl-10 h-11" />
-                      </div>
+                      <Input id="firstName" value={formData.firstName} onChange={handleInputChange} placeholder="Alex" className="h-11" />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="lastName">Last Name</Label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input id="lastName" value={formData.lastName} onChange={handleInputChange} placeholder="Smith" className="pl-10 h-11" />
-                      </div>
+                      <Input id="lastName" value={formData.lastName} onChange={handleInputChange} placeholder="Smith" className="h-11" />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number</Label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input id="phone" type="tel" value={formData.phone} onChange={handleInputChange} placeholder="(555) 000-0000" className="pl-10 h-11" />
-                    </div>
+                    <Input id="phone" type="tel" value={formData.phone} onChange={handleInputChange} placeholder="(555) 000-0000" className="h-11" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="city">City of Operation</Label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input id="city" value={formData.city} onChange={handleInputChange} placeholder="Chicago, IL" className="pl-10 h-11" />
-                    </div>
+                    <Input id="city" value={formData.city} onChange={handleInputChange} placeholder="Chicago, IL" className="h-11" />
                   </div>
                 </div>
               )}
@@ -376,13 +339,13 @@ export default function Register() {
                     <Label>Service Expertise</Label>
                     <div className="grid grid-cols-2 gap-3">
                       {['Residential', 'Commercial', 'Deep Clean', 'Move In/Out'].map((type) => (
-                        <div key={type} className="flex items-center space-x-3 border p-4 rounded-xl hover:bg-primary/5 cursor-pointer transition-all">
+                        <div key={type} className="flex items-center space-x-3 border p-4 rounded-xl hover:bg-primary/5 cursor-pointer">
                           <Checkbox 
                             id={type} 
                             checked={formData.expertise.includes(type)} 
                             onCheckedChange={() => handleExpertiseChange(type)}
                           />
-                          <label htmlFor={type} className="text-sm font-bold cursor-pointer leading-none">
+                          <label htmlFor={type} className="text-sm font-bold cursor-pointer">
                             {type}
                           </label>
                         </div>
@@ -392,11 +355,11 @@ export default function Register() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="experience">Years of Experience</Label>
-                      <Input id="experience" type="number" value={formData.experience} onChange={handleInputChange} placeholder="0" min="0" className="h-11" />
+                      <Input id="experience" type="number" value={formData.experience} onChange={handleInputChange} className="h-11" />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="teamSize">Team Size</Label>
-                      <Input id="teamSize" type="number" value={formData.teamSize} onChange={handleInputChange} placeholder="1" min="1" className="h-11" />
+                      <Input id="teamSize" type="number" value={formData.teamSize} onChange={handleInputChange} className="h-11" />
                     </div>
                   </div>
                 </div>
@@ -409,7 +372,7 @@ export default function Register() {
                       <ShieldCheck className="w-5 h-5" /> Terms & Verification
                     </h4>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      To maintain the highest quality of service on CleanSweep, all providers must pass a professional background check and agree to our independent contractor agreement.
+                      All providers must pass a background check.
                     </p>
                   </div>
                   <div className="space-y-4">
@@ -419,8 +382,8 @@ export default function Register() {
                         checked={formData.agreedToTerms}
                         onCheckedChange={(checked) => setFormData(prev => ({ ...prev, agreedToTerms: !!checked }))}
                       />
-                      <label htmlFor="terms" className="text-sm text-muted-foreground font-medium leading-tight cursor-pointer">
-                        I agree to the <Link href="#" className="text-primary hover:underline">Terms of Service</Link> and <Link href="#" className="text-primary hover:underline">Privacy Policy</Link>.
+                      <label htmlFor="terms" className="text-sm text-muted-foreground font-medium cursor-pointer">
+                        I agree to the Terms of Service.
                       </label>
                     </div>
                     <div className="flex items-start space-x-3 p-2">
@@ -429,7 +392,7 @@ export default function Register() {
                         checked={formData.consentedToBackground}
                         onCheckedChange={(checked) => setFormData(prev => ({ ...prev, consentedToBackground: !!checked }))}
                       />
-                      <label htmlFor="background" className="text-sm text-muted-foreground font-medium leading-tight cursor-pointer">
+                      <label htmlFor="background" className="text-sm text-muted-foreground font-medium cursor-pointer">
                         I consent to a professional background check.
                       </label>
                     </div>
@@ -440,42 +403,30 @@ export default function Register() {
 
             <CardFooter className="flex justify-between border-t p-8 bg-white">
               {step > 1 ? (
-                <Button type="button" variant="ghost" onClick={() => setStep(s => s - 1)} disabled={loading} className="px-6 h-12 font-bold text-muted-foreground">
-                  <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                <Button type="button" variant="ghost" onClick={() => setStep(s => s - 1)} disabled={loading} className="px-6 h-12 font-bold">
+                  Back
                 </Button>
               ) : (
                 <div />
               )}
               
               {step === 1 && (
-                <Button type="button" onClick={handleAuthSubmit} disabled={loading} className="bg-primary px-8 h-12 rounded-xl font-bold shadow-lg shadow-primary/20">
-                  {loading ? "Creating Account..." : "Create Account"}
-                  <ArrowRight className="ml-2 w-4 h-4" />
+                <Button type="button" onClick={handleAuthSubmit} disabled={loading} className="bg-primary px-8 h-12 rounded-xl font-bold">
+                  {loading ? "Creating..." : "Create Account"}
                 </Button>
               )}
-              {step === 2 && (
-                <Button type="button" onClick={handleStep2Submit} className="bg-primary px-8 h-12 rounded-xl font-bold">
+              {step >= 2 && step < 4 && (
+                <Button type="button" onClick={step === 2 ? handleStep2Submit : handleStep3Submit} className="bg-primary px-8 h-12 rounded-xl font-bold">
                   Next Step
-                  <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
-              )}
-              {step === 3 && (
-                <Button type="button" onClick={handleStep3Submit} className="bg-primary px-8 h-12 rounded-xl font-bold">
-                  Review & Sign
-                  <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               )}
               {step === 4 && (
-                <Button type="button" onClick={handleFinalSubmit} disabled={loading} className="bg-primary px-10 h-12 rounded-xl font-bold shadow-xl shadow-primary/30">
+                <Button type="button" onClick={handleFinalSubmit} disabled={loading} className="bg-primary px-10 h-12 rounded-xl font-bold">
                   {loading ? "Finalizing..." : "Submit Application"}
                 </Button>
               )}
             </CardFooter>
           </Card>
-          
-          <p className="text-center mt-6 text-sm text-muted-foreground">
-            Already have an account? <Link href="/login" className="text-primary font-bold hover:underline">Sign In</Link>
-          </p>
         </div>
       </main>
     </div>
