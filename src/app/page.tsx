@@ -200,8 +200,8 @@ export default function Home() {
 
           {/* Bottom Bar */}
           <div className="pt-10 border-t flex flex-col md:flex-row justify-between items-center gap-6">
-            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em]">
-              © 2026 CleanSweep National. Provider Network.
+            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em] flex items-center gap-1">
+              <span className="text-lg">©</span> 2026 CleanSweep Cleaning Company LLC. All Rights Reserved.
             </p>
             <div className="flex gap-8">
               <Link className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-[0.2em]" href="#">Privacy Policy</Link>
