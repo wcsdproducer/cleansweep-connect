@@ -156,9 +156,9 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
-                <div className="pt-12">
+                <div className="pt-8">
                   <Link href="/register">
-                    <Button size="lg" className="h-16 px-10 text-xl text-[#0E2531] font-bold bg-accent hover:bg-accent/90 rounded-2xl shadow-xl shadow-black/10 border-none transition-all hover:scale-105">
+                    <Button size="lg" className="h-16 px-10 text-xl text-[#0E2531] font-extrabold bg-accent hover:bg-accent/90 rounded-2xl shadow-xl shadow-black/10 border-none transition-all hover:scale-105">
                       Apply to Join Now
                     </Button>
                   </Link>
@@ -180,21 +180,33 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="py-20 bg-white border-t">
-        <div className="container px-6 mx-auto flex flex-col md:flex-row justify-between items-center gap-12">
-          <Link href="/">
-            <Image 
-              src="https://firebasestorage.googleapis.com/v0/b/studio-3673070449-f277c.firebasestorage.app/o/CleanSweep-Layer%2011%20copy.png?alt=media&token=e060532e-cc86-43f8-8780-76371d95c936"
-              alt="CleanSweep Logo"
-              width={240}
-              height={65}
-            />
-          </Link>
-          <p className="text-sm text-muted-foreground font-bold uppercase tracking-widest">© 2024 CleanSweep National. Provider Network.</p>
-          <div className="flex gap-10">
-            <Link className="text-sm font-extrabold text-muted-foreground hover:text-primary transition-colors" href="#">Provider Agreement</Link>
-            <Link className="text-sm font-extrabold text-muted-foreground hover:text-primary transition-colors" href="#">Privacy</Link>
-            <Link className="text-sm font-extrabold text-muted-foreground hover:text-primary transition-colors" href="#">Support</Link>
+      <footer className="pt-20 pb-10 bg-white border-t">
+        <div className="container px-6 mx-auto">
+          {/* Top Section */}
+          <div className="flex flex-col md:flex-row justify-between items-center gap-12 mb-16">
+            <Link href="/">
+              <Image 
+                src="https://firebasestorage.googleapis.com/v0/b/studio-3673070449-f277c.firebasestorage.app/o/CleanSweep-Layer%2011%20copy.png?alt=media&token=e060532e-cc86-43f8-8780-76371d95c936"
+                alt="CleanSweep Logo"
+                width={240}
+                height={65}
+              />
+            </Link>
+            <div className="flex gap-10">
+              <Link className="text-sm font-extrabold text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest" href="#">Provider Agreement</Link>
+              <Link className="text-sm font-extrabold text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest" href="#">Support</Link>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="pt-10 border-t flex flex-col md:flex-row justify-between items-center gap-6">
+            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em]">
+              © 2024 CleanSweep National. Provider Network.
+            </p>
+            <div className="flex gap-8">
+              <Link className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-[0.2em]" href="#">Privacy Policy</Link>
+              <Link className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-[0.2em]" href="#">Terms of Service</Link>
+            </div>
           </div>
         </div>
       </footer>
