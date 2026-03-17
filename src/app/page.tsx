@@ -2,7 +2,19 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { CheckCircle, ShieldCheck, Zap, Star, Users, Briefcase, ChevronRight, Sparkles, Check } from 'lucide-react';
+import { 
+  CheckCircle, 
+  Zap, 
+  Users, 
+  Briefcase, 
+  ChevronRight, 
+  Sparkles, 
+  Check,
+  Facebook,
+  Instagram,
+  Twitter,
+  Linkedin
+} from 'lucide-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function Home() {
@@ -184,14 +196,30 @@ export default function Home() {
         <div className="container px-6 mx-auto">
           {/* Top Section */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-12 mb-16">
-            <Link href="/">
-              <Image 
-                src="https://firebasestorage.googleapis.com/v0/b/studio-3673070449-f277c.firebasestorage.app/o/CleanSweep-Layer%2011%20copy.png?alt=media&token=e060532e-cc86-43f8-8780-76371d95c936"
-                alt="CleanSweep Logo"
-                width={240}
-                height={65}
-              />
-            </Link>
+            <div className="flex flex-col items-center md:items-start gap-6">
+              <Link href="/">
+                <Image 
+                  src="https://firebasestorage.googleapis.com/v0/b/studio-3673070449-f277c.firebasestorage.app/o/CleanSweep-Layer%2011%20copy.png?alt=media&token=e060532e-cc86-43f8-8780-76371d95c936"
+                  alt="CleanSweep Logo"
+                  width={240}
+                  height={65}
+                />
+              </Link>
+              <div className="flex gap-4 text-muted-foreground">
+                <Link href="#" className="hover:text-primary transition-colors">
+                  <Facebook className="w-5 h-5" />
+                </Link>
+                <Link href="#" className="hover:text-primary transition-colors">
+                  <Instagram className="w-5 h-5" />
+                </Link>
+                <Link href="#" className="hover:text-primary transition-colors">
+                  <Twitter className="w-5 h-5" />
+                </Link>
+                <Link href="#" className="hover:text-primary transition-colors">
+                  <Linkedin className="w-5 h-5" />
+                </Link>
+              </div>
+            </div>
             <div className="flex gap-10">
               <Link className="text-sm font-extrabold text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest" href="#">Provider Agreement</Link>
               <Link className="text-sm font-extrabold text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest" href="#">Support</Link>
