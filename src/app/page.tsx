@@ -41,9 +41,25 @@ export default function Home() {
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative min-h-[calc(100vh-80px)] flex items-center py-20 overflow-hidden">
-          <div className="container px-6 mx-auto grid lg:grid-cols-2 gap-12 items-center">
+          {/* Background Image */}
+          {heroImg && (
+            <div className="absolute inset-0 z-0">
+              <Image
+                src={heroImg.imageUrl}
+                alt={heroImg.description}
+                fill
+                className="object-cover object-center"
+                priority
+                data-ai-hint={heroImg.imageHint}
+              />
+              {/* Overlay for legibility */}
+              <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/80 to-transparent lg:from-white/90 lg:via-white/60" />
+            </div>
+          )}
+
+          <div className="container relative z-10 px-6 mx-auto">
             <div className="flex flex-col space-y-8 max-w-2xl animate-in fade-in slide-in-from-left-8 duration-700">
-              <div className="inline-flex items-center px-4 py-2 rounded-full bg-primary/10 text-primary font-bold text-sm w-fit">
+              <div className="inline-flex items-center px-4 py-2 rounded-full bg-primary/20 text-primary font-bold text-sm w-fit backdrop-blur-sm">
                 <Star className="w-4 h-4 mr-2 fill-primary" />
                 Rated 4.9/5 by Professionals
               </div>
@@ -59,32 +75,18 @@ export default function Home() {
                     Get Started Now <ChevronRight className="ml-2 w-5 h-5" />
                   </Button>
                 </Link>
-                <Button size="lg" variant="secondary" className="h-16 px-10 text-lg rounded-2xl w-full sm:w-auto font-bold">
+                <Button size="lg" variant="secondary" className="h-16 px-10 text-lg rounded-2xl w-full sm:w-auto font-bold bg-white/50 backdrop-blur-md">
                   View Our Services
                 </Button>
               </div>
-            </div>
-            <div className="relative h-[500px] lg:h-[650px] w-full rounded-[3rem] overflow-hidden shadow-2xl animate-in fade-in slide-in-from-right-8 duration-700">
-              {heroImg && (
-                <Image
-                  src={heroImg.imageUrl}
-                  alt={heroImg.description}
-                  fill
-                  className="object-cover"
-                  priority
-                  data-ai-hint={heroImg.imageHint}
-                />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-              <div className="absolute bottom-10 left-10 right-10 p-8 bg-white/10 backdrop-blur-2xl rounded-[2.5rem] border border-white/20">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-accent rounded-2xl flex items-center justify-center text-accent-foreground shadow-xl">
-                    <CheckCircle className="w-7 h-7" />
-                  </div>
-                  <div>
-                    <h4 className="text-white text-lg font-bold">Bonded & Insured</h4>
-                    <p className="text-white/80 font-medium">Your home is safe in our hands.</p>
-                  </div>
+              
+              <div className="flex items-center gap-4 pt-8">
+                <div className="w-12 h-12 bg-accent rounded-xl flex items-center justify-center text-accent-foreground shadow-xl">
+                  <CheckCircle className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-foreground text-lg font-bold">Bonded & Insured</h4>
+                  <p className="text-muted-foreground font-medium">Your home is safe in our hands.</p>
                 </div>
               </div>
             </div>
