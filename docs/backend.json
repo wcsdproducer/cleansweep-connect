@@ -1,0 +1,31 @@
+{
+  "entities": {
+    "ServiceProvider": {
+      "title": "Service Provider",
+      "description": "Details about a service provider applying to join CleanSweep.",
+      "type": "object",
+      "properties": {
+        "firstName": { "type": "string" },
+        "lastName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "city": { "type": "string" },
+        "experience": { "type": "string" },
+        "teamSize": { "type": "string" },
+        "expertise": { "type": "array", "items": { "type": "string" } },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["firstName", "lastName", "email"]
+    }
+  },
+  "auth": {
+    "providers": ["password", "google.com"]
+  },
+  "firestore": {
+    "serviceProviders/{providerId}": {
+      "schema": "ServiceProvider",
+      "description": "Registration records for cleaning service providers."
+    }
+  }
+}

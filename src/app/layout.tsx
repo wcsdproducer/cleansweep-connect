@@ -1,10 +1,10 @@
-
 import type {Metadata} from 'next';
 import './globals.css';
+import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
-  title: 'CleanPro Connect | Service Provider Portal',
-  description: 'National Cleaning Company Brand - Provider Management Platform',
+  title: 'CleanSweep | Professional Cleaning Services',
+  description: 'National Cleaning Company Brand - Join as a Service Provider',
 };
 
 export default function RootLayout({
@@ -19,7 +19,11 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased selection:bg-accent/30">{children}</body>
+      <body className="font-body antialiased selection:bg-accent/30">
+        <FirebaseClientProvider>
+          {children}
+        </FirebaseClientProvider>
+      </body>
     </html>
   );
 }
