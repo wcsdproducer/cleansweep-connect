@@ -11,7 +11,8 @@ import {
   User, 
   Settings, 
   LogOut,
-  ShieldCheck 
+  ShieldCheck,
+  Map
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -32,6 +33,7 @@ const navItems = [
   { name: 'Schedule', href: '/dashboard/schedule', icon: Calendar },
   { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
   { name: 'Accounting', href: '/dashboard/accounting', icon: Wallet },
+  { name: 'Coverage Area', href: '/dashboard/coverage', icon: Map },
 ];
 
 const secondaryItems = [

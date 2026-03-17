@@ -34,6 +34,26 @@
       },
       "required": ["firstName", "lastName", "email"]
     },
+    "ProviderCoverage": {
+      "title": "Provider Coverage",
+      "description": "Geospatial coverage settings for a service provider.",
+      "type": "object",
+      "properties": {
+        "providerId": { "type": "string" },
+        "center": {
+          "type": "object",
+          "properties": {
+            "lat": { "type": "number" },
+            "lng": { "type": "number" }
+          }
+        },
+        "radiusMiles": { "type": "number" },
+        "selectedZips": { "type": "array", "items": { "type": "string" } },
+        "excludedZips": { "type": "array", "items": { "type": "string" } },
+        "geohash": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
     "Job": {
       "title": "Job",
       "description": "A scheduled cleaning service job.",
@@ -84,6 +104,10 @@
     "serviceProviders/{providerId}": {
       "schema": "ServiceProvider",
       "description": "Registration records for cleaning service providers."
+    },
+    "provider_coverage/{providerId}": {
+      "schema": "ProviderCoverage",
+      "description": "Geospatial coverage settings."
     },
     "jobs/{jobId}": {
       "schema": "Job",
