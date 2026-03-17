@@ -17,6 +17,7 @@ import { useFirestore, useAuth } from '@/firebase';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
 import { seedDatabaseIfEmpty } from '@/lib/seed';
+import { useRouter } from 'next/navigation';
 
 export default function Register() {
   const [step, setStep] = useState(1);
@@ -24,6 +25,7 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const db = useFirestore();
   const auth = useAuth();
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -38,9 +40,6 @@ export default function Register() {
     agreedToTerms: false,
     consentedToBackground: false,
   });
-
-  const nextStep = () => setStep(s => s + 1);
-  const prevStep = () => setStep(s => s - 1);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -57,11 +56,32 @@ export default function Register() {
     });
   };
 
+  const validateStep1 = () => {
+    const { firstName, lastName, email, password, phone, city } = formData;
+    if (!firstName || !lastName || !email || !password || !phone || !city) {
+      toast({ variant: "destructive", title: "Missing Information", description: "Please fill out all personal details." });
+      return false;
+    }
+    if (password.length < 6) {
+      toast({ variant: "destructive", title: "Weak Password", description: "Password must be at least 6 characters." });
+      return false;
+    }
+    return true;
+  };
+
+  const validateStep2 = () => {
+    const { experience, teamSize, expertise } = formData;
+    if (!experience || !teamSize || expertise.length === 0) {
+      toast({ variant: "destructive", title: "Missing Information", description: "Please provide your experience and at least one expertise." });
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!db || !auth) return;
     
-    // Final validation check for checkboxes
     if (!formData.agreedToTerms || !formData.consentedToBackground) {
       toast({
         variant: "destructive",
@@ -78,7 +98,7 @@ export default function Register() {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
 
-      // 2. Create User Profile with explicit Service Provider Role
+      // 2. Prepare Data
       const userDocRef = doc(db, 'users', user.uid);
       const userData = {
         uid: user.uid,
@@ -89,6 +109,16 @@ export default function Register() {
         createdAt: serverTimestamp(),
       };
 
+      const providerDocRef = doc(db, 'serviceProviders', user.uid);
+      const { password: _, agreedToTerms: __, consentedToBackground: ___, ...providerDataWithoutExtras } = formData;
+      const providerData = {
+        ...providerDataWithoutExtras,
+        uid: user.uid,
+        status: 'pending',
+        createdAt: serverTimestamp(),
+      };
+
+      // 3. Initiate writes immediately
       setDoc(userDocRef, userData).catch(err => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
           path: userDocRef.path,
@@ -97,36 +127,25 @@ export default function Register() {
         }));
       });
 
-      // 3. Create Service Provider Application Details
-      const providerDocRef = doc(db, 'serviceProviders', user.uid);
-      const { password, agreedToTerms, consentedToBackground, ...providerDataWithoutExtras } = formData;
-      const providerData = {
-        ...providerDataWithoutExtras,
-        uid: user.uid,
-        status: 'pending',
-        createdAt: serverTimestamp(),
-      };
-
       setDoc(providerDocRef, providerData, { merge: true })
-        .then(async () => {
-          await seedDatabaseIfEmpty(db);
-          setLoading(false);
-          toast({
-            title: "Account Created Successfully",
-            description: "Your service provider application has been submitted.",
-          });
-          window.location.href = "/dashboard";
-        })
-        .catch(async (serverError) => {
-          setLoading(false);
-          const permissionError = new FirestorePermissionError({
+        .catch((serverError) => {
+          errorEmitter.emit('permission-error', new FirestorePermissionError({
             path: providerDocRef.path,
             operation: 'create',
             requestResourceData: providerData,
-          } satisfies SecurityRuleContext);
-
-          errorEmitter.emit('permission-error', permissionError);
+          } satisfies SecurityRuleContext));
         });
+
+      // 4. Seed and Redirect
+      // We initiate seeding and then redirect. Local cache will handle immediate data availability.
+      seedDatabaseIfEmpty(db).finally(() => {
+        toast({
+          title: "Registration Successful!",
+          description: "Welcome to CleanSweep.",
+        });
+        setLoading(false);
+        router.push("/dashboard");
+      });
 
     } catch (authError: any) {
       setLoading(false);
@@ -152,7 +171,7 @@ export default function Register() {
         </Link>
       </header>
 
-      <main className="flex-1 flex items-center justify-center p-6">
+      <main className="flex-1 flex items-center justify-center p-6 bg-secondary/20">
         <div className="w-full max-w-xl">
           <div className="flex justify-between items-center mb-8 px-2">
             {[1, 2, 3].map((s) => (
@@ -191,16 +210,16 @@ export default function Register() {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="firstName">First Name</Label>
-                        <Input id="firstName" value={formData.firstName} onChange={handleInputChange} placeholder="John" required />
+                        <Input id="firstName" value={formData.firstName} onChange={handleInputChange} placeholder="John" />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="lastName">Last Name</Label>
-                        <Input id="lastName" value={formData.lastName} onChange={handleInputChange} placeholder="Doe" required />
+                        <Input id="lastName" value={formData.lastName} onChange={handleInputChange} placeholder="Doe" />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="email">Email Address</Label>
-                      <Input id="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="john@example.com" required />
+                      <Input id="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="john@example.com" />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="password">Password</Label>
@@ -211,8 +230,6 @@ export default function Register() {
                           value={formData.password} 
                           onChange={handleInputChange} 
                           placeholder="Min 6 characters" 
-                          required 
-                          minLength={6}
                         />
                         <button 
                           type="button"
@@ -225,11 +242,11 @@ export default function Register() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="phone">Phone Number</Label>
-                      <Input id="phone" type="tel" value={formData.phone} onChange={handleInputChange} placeholder="(555) 000-0000" required />
+                      <Input id="phone" type="tel" value={formData.phone} onChange={handleInputChange} placeholder="(555) 000-0000" />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="city">City of Operation</Label>
-                      <Input id="city" value={formData.city} onChange={handleInputChange} placeholder="e.g. Chicago, IL" required />
+                      <Input id="city" value={formData.city} onChange={handleInputChange} placeholder="e.g. Chicago, IL" />
                     </div>
                   </div>
                 )}
@@ -255,11 +272,11 @@ export default function Register() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="experience">Years of Experience</Label>
-                      <Input id="experience" type="number" value={formData.experience} onChange={handleInputChange} placeholder="0" min="0" required />
+                      <Input id="experience" type="number" value={formData.experience} onChange={handleInputChange} placeholder="0" min="0" />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="teamSize">Team Size</Label>
-                      <Input id="teamSize" type="number" value={formData.teamSize} onChange={handleInputChange} placeholder="1" min="1" required />
+                      <Input id="teamSize" type="number" value={formData.teamSize} onChange={handleInputChange} placeholder="1" min="1" />
                     </div>
                   </div>
                 )}
@@ -299,7 +316,7 @@ export default function Register() {
               </CardContent>
               <CardFooter className="flex justify-between border-t p-8 bg-white">
                 {step > 1 ? (
-                  <Button type="button" variant="outline" onClick={prevStep} disabled={loading} className="rounded-xl px-6 h-12">
+                  <Button type="button" variant="outline" onClick={() => setStep(s => s - 1)} disabled={loading} className="rounded-xl px-6 h-12">
                     <ArrowLeft className="w-4 h-4 mr-2" /> Back
                   </Button>
                 ) : (
@@ -309,11 +326,8 @@ export default function Register() {
                   <Button 
                     type="button" 
                     onClick={() => {
-                      if (step === 1 && (!formData.email || !formData.password || !formData.firstName)) {
-                        toast({ variant: "destructive", title: "Missing fields", description: "Please fill out all required fields." });
-                        return;
-                      }
-                      nextStep();
+                      if (step === 1 && validateStep1()) setStep(2);
+                      else if (step === 2 && validateStep2()) setStep(3);
                     }} 
                     className="bg-primary rounded-xl px-8 h-12 shadow-lg shadow-primary/20"
                   >

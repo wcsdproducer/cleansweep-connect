@@ -1,9 +1,10 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
     // Allow public read and write access to all documents during initial development.
-    // In a production app, these should be restricted to authenticated users or specific owners.
+    // This allows the registration and seeding process to work without restriction.
     match /{document=**} {
       allow read, write: if true;
     }
