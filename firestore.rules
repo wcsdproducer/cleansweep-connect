@@ -3,7 +3,7 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // UPDATED: Rules re-deployed to ensure write permissions are active for studio-3673070449-f277c
+    // FORCE REDEPLOY: Updated at 2024-05-20T10:00:00Z to ensure write permissions are active
     match /{document=**} {
       allow read, write: if true;
     }

@@ -94,10 +94,11 @@ export default function Register() {
     setLoading(true);
 
     try {
+      // 1. Create Auth User
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
 
-      const userDocRef = doc(db, 'users', user.uid);
+      // 2. Prepare Data
       const userData = {
         uid: user.uid,
         email: formData.email,
@@ -107,7 +108,6 @@ export default function Register() {
         createdAt: serverTimestamp(),
       };
 
-      const providerDocRef = doc(db, 'serviceProviders', user.uid);
       const { password: _, agreedToTerms: __, consentedToBackground: ___, ...providerDataWithoutExtras } = formData;
       const providerData = {
         ...providerDataWithoutExtras,
@@ -116,26 +116,37 @@ export default function Register() {
         createdAt: serverTimestamp(),
       };
 
-      // Initiate writes
-      setDoc(userDocRef, userData).catch(err => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({
-          path: userDocRef.path,
-          operation: 'create',
-          requestResourceData: userData,
-        }));
-      });
+      // 3. Perform Writes (Parallel but tracked)
+      const userDocRef = doc(db, 'users', user.uid);
+      const providerDocRef = doc(db, 'serviceProviders', user.uid);
 
-      setDoc(providerDocRef, providerData, { merge: true })
-        .catch((serverError) => {
+      const writePromises = [
+        setDoc(userDocRef, userData).catch((err) => {
+          errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: userDocRef.path,
+            operation: 'create',
+            requestResourceData: userData,
+          }));
+          throw err;
+        }),
+        setDoc(providerDocRef, providerData, { merge: true }).catch((err) => {
           errorEmitter.emit('permission-error', new FirestorePermissionError({
             path: providerDocRef.path,
             operation: 'create',
             requestResourceData: providerData,
           } satisfies SecurityRuleContext));
-        });
+          throw err;
+        })
+      ];
 
-      // Seeding and Redirect
-      await seedDatabaseIfEmpty(db);
+      await Promise.all(writePromises);
+
+      // 4. Seeding (Optional/Non-blocking)
+      try {
+        await seedDatabaseIfEmpty(db);
+      } catch (seedError) {
+        console.warn("Database seeding skipped or failed:", seedError);
+      }
       
       toast({
         title: "Registration Successful!",
@@ -144,12 +155,13 @@ export default function Register() {
       
       router.push("/dashboard");
 
-    } catch (authError: any) {
+    } catch (error: any) {
       setLoading(false);
+      // Auth errors or Firestore write errors will be caught here
       toast({
         variant: "destructive",
         title: "Registration Failed",
-        description: authError.message || "An error occurred during account creation.",
+        description: error.message || "An error occurred during account creation.",
       });
     }
   };
