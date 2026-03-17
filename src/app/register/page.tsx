@@ -103,26 +103,33 @@ export default function Register() {
     const userDocRef = doc(db, 'users', uid);
     const providerDocRef = doc(db, 'serviceProviders', uid);
 
-    try {
-      await setDoc(userDocRef, userData, { merge: true });
-      await setDoc(providerDocRef, providerData, { merge: true });
-      
-      // Seed if necessary, but don't block registration success
-      seedDatabaseIfEmpty(db).catch(err => console.warn("Seeding failed", err));
-      
-      toast({
-        title: "Registration Successful!",
-        description: "Welcome to CleanSweep.",
+    // Non-blocking writes following guidelines
+    setDoc(userDocRef, userData, { merge: true })
+      .catch(async (err) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: userDocRef.path,
+          operation: 'create',
+          requestResourceData: userData,
+        }));
       });
-      router.push("/dashboard");
-    } catch (err: any) {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({
-        path: userDocRef.path,
-        operation: 'create',
-        requestResourceData: userData,
-      }));
-      throw err;
-    }
+
+    setDoc(providerDocRef, providerData, { merge: true })
+      .catch(async (err) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: providerDocRef.path,
+          operation: 'create',
+          requestResourceData: providerData,
+        }));
+      });
+      
+    // Seed if necessary, but don't block registration success
+    seedDatabaseIfEmpty(db).catch(err => console.warn("Seeding failed", err));
+    
+    toast({
+      title: "Registration Initiated",
+      description: "Welcome to CleanSweep.",
+    });
+    router.push("/dashboard");
   };
 
   const handleGoogleSignup = async () => {
