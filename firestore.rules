@@ -3,8 +3,7 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow public read and write access to all documents during initial development.
-    // This allows the registration and seeding process to work without restriction.
+    // UPDATED: Rules re-deployed to ensure write permissions are active for studio-3673070449-f277c
     match /{document=**} {
       allow read, write: if true;
     }

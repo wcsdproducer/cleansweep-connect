@@ -94,11 +94,9 @@ export default function Register() {
     setLoading(true);
 
     try {
-      // 1. Create Authentication User
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
 
-      // 2. Prepare Data
       const userDocRef = doc(db, 'users', user.uid);
       const userData = {
         uid: user.uid,
@@ -118,7 +116,7 @@ export default function Register() {
         createdAt: serverTimestamp(),
       };
 
-      // 3. Initiate writes immediately
+      // Initiate writes
       setDoc(userDocRef, userData).catch(err => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
           path: userDocRef.path,
@@ -136,16 +134,15 @@ export default function Register() {
           } satisfies SecurityRuleContext));
         });
 
-      // 4. Seed and Redirect
-      // We initiate seeding and then redirect. Local cache will handle immediate data availability.
-      seedDatabaseIfEmpty(db).finally(() => {
-        toast({
-          title: "Registration Successful!",
-          description: "Welcome to CleanSweep.",
-        });
-        setLoading(false);
-        router.push("/dashboard");
+      // Seeding and Redirect
+      await seedDatabaseIfEmpty(db);
+      
+      toast({
+        title: "Registration Successful!",
+        description: "Welcome to CleanSweep.",
       });
+      
+      router.push("/dashboard");
 
     } catch (authError: any) {
       setLoading(false);
