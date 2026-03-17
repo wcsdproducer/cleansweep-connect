@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/dashboard/sidebar-nav';
 import { Toaster } from '@/components/ui/toaster';
@@ -14,49 +14,46 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading: userLoading } = useUser();
+  const { user, isUserLoading } = useUser();
   const db = useFirestore();
   const router = useRouter();
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
-  const { data: userData, loading: docLoading } = useDoc(
+  const { data: userData, isLoading: isDocLoading } = useDoc(
     user && db ? doc(db, 'users', user.uid) : null
   );
 
   useEffect(() => {
-    // Redirect if not logged in
-    if (!userLoading && !user) {
+    if (!isUserLoading && !user) {
       router.push('/login');
     }
-  }, [user, userLoading, router]);
+  }, [user, isUserLoading, router]);
 
   useEffect(() => {
-    // Redirect if role is incorrect or user document is missing
-    if (!docLoading && user) {
-      if (!userData || userData.role !== 'Service Provider') {
+    if (!isDocLoading && user) {
+      if (userData?.role === 'Service Provider') {
+        setIsAuthorized(true);
+      } else if (userData) {
+        // Logged in but not a provider
         router.push('/login');
       }
     }
-  }, [userData, docLoading, user, router]);
+  }, [userData, isDocLoading, user, router]);
 
-  if (userLoading || docLoading) {
+  if (isUserLoading || isDocLoading || isAuthorized === null) {
     return (
       <div className="h-screen w-full flex items-center justify-center bg-background">
-        <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="w-12 h-12 bg-primary/20 rounded-full animate-bounce" />
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
           <p className="text-sm text-muted-foreground font-medium">Verifying access...</p>
         </div>
       </div>
     );
   }
 
-  // Final check to prevent flicker before redirect
-  if (!user || !userData || userData.role !== 'Service Provider') {
-    return null;
-  }
-
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-full bg-background overflow-hidden selection:bg-primary/20">
+      <div className="flex h-screen w-full bg-background overflow-hidden">
         <SidebarNav />
         <SidebarInset className="flex-1 flex flex-col min-w-0 bg-background">
           <main className="flex-1 overflow-y-auto p-6 lg:p-10 scroll-smooth">
