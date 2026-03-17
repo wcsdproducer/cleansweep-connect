@@ -134,8 +134,8 @@ export default function Home() {
         </section>
 
         {/* Call to Action */}
-        <section className="py-32 bg-foreground text-white overflow-hidden relative">
-          <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 -skew-x-12 transform translate-x-1/2" />
+        <section className="py-32 bg-primary text-white overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-1/3 h-full bg-white/5 -skew-x-12 transform translate-x-1/2" />
           <div className="container px-6 mx-auto relative z-10">
             <div className="grid lg:grid-cols-2 gap-20 items-center">
               <div className="space-y-12">
