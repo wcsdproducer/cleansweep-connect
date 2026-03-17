@@ -1,10 +1,26 @@
+
 {
   "entities": {
+    "User": {
+      "title": "User",
+      "description": "A platform user with an assigned role.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["Customer", "Admin", "Service Provider"] },
+        "firstName": { "type": "string" },
+        "lastName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
     "ServiceProvider": {
       "title": "Service Provider",
       "description": "Details about a service provider applying to join CleanSweep.",
       "type": "object",
       "properties": {
+        "uid": { "type": "string" },
         "firstName": { "type": "string" },
         "lastName": { "type": "string" },
         "email": { "type": "string", "format": "email" },
@@ -61,6 +77,10 @@
     "providers": ["password", "google.com"]
   },
   "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "General user accounts and roles."
+    },
     "serviceProviders/{providerId}": {
       "schema": "ServiceProvider",
       "description": "Registration records for cleaning service providers."

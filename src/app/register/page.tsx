@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -8,10 +9,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowRight, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { ArrowRight, ArrowLeft, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { useFirestore, useAuth } from '@/firebase';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
 import { seedDatabaseIfEmpty } from '@/lib/seed';
@@ -19,12 +21,15 @@ import { seedDatabaseIfEmpty } from '@/lib/seed';
 export default function Register() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const db = useFirestore();
+  const auth = useAuth();
 
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
+    password: '',
     phone: '',
     city: '',
     experience: '',
@@ -52,47 +57,73 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!db) return;
+    if (!db || !auth) return;
     
     setLoading(true);
 
-    const providerId = formData.email.replace(/[^a-zA-Z0-9]/g, '_');
-    const docRef = doc(db, 'serviceProviders', providerId);
+    try {
+      // 1. Create Authentication User
+      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      const user = userCredential.user;
 
-    const providerData = {
-      ...formData,
-      status: 'pending',
-      createdAt: serverTimestamp(),
-    };
+      // 2. Create User Profile with Role
+      const userDocRef = doc(db, 'users', user.uid);
+      const userData = {
+        uid: user.uid,
+        email: formData.email,
+        role: 'Service Provider',
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        createdAt: serverTimestamp(),
+      };
 
-    setDoc(docRef, providerData, { merge: true })
-      .then(async () => {
-        // Seed the database if this is the first provider
-        await seedDatabaseIfEmpty(db);
-        
-        setLoading(false);
-        toast({
-          title: "Application Submitted",
-          description: "We've received your application. Our team will review it shortly.",
-        });
-        window.location.href = "/dashboard";
-      })
-      .catch(async (serverError) => {
-        setLoading(false);
-        const permissionError = new FirestorePermissionError({
-          path: docRef.path,
+      setDoc(userDocRef, userData).catch(err => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: userDocRef.path,
           operation: 'create',
-          requestResourceData: providerData,
-        } satisfies SecurityRuleContext);
-
-        errorEmitter.emit('permission-error', permissionError);
-        
-        toast({
-          variant: "destructive",
-          title: "Error submitting application",
-          description: "Please try again or contact support.",
-        });
+          requestResourceData: userData,
+        }));
       });
+
+      // 3. Create Service Provider Application Details
+      const providerDocRef = doc(db, 'serviceProviders', user.uid);
+      const { password, ...providerDataWithoutPassword } = formData;
+      const providerData = {
+        ...providerDataWithoutPassword,
+        uid: user.uid,
+        status: 'pending',
+        createdAt: serverTimestamp(),
+      };
+
+      setDoc(providerDocRef, providerData, { merge: true })
+        .then(async () => {
+          await seedDatabaseIfEmpty(db);
+          setLoading(false);
+          toast({
+            title: "Account Created Successfully",
+            description: "Your service provider application has been submitted.",
+          });
+          window.location.href = "/dashboard";
+        })
+        .catch(async (serverError) => {
+          setLoading(false);
+          const permissionError = new FirestorePermissionError({
+            path: providerDocRef.path,
+            operation: 'create',
+            requestResourceData: providerData,
+          } satisfies SecurityRuleContext);
+
+          errorEmitter.emit('permission-error', permissionError);
+        });
+
+    } catch (authError: any) {
+      setLoading(false);
+      toast({
+        variant: "destructive",
+        title: "Registration Failed",
+        description: authError.message || "An error occurred during account creation.",
+      });
+    }
   };
 
   return (
@@ -132,12 +163,12 @@ export default function Register() {
             <form onSubmit={handleSubmit}>
               <CardHeader className="bg-primary/5 p-8">
                 <CardTitle className="text-2xl text-primary font-bold">
-                  {step === 1 && "Personal Information"}
+                  {step === 1 && "Account Information"}
                   {step === 2 && "Experience & Services"}
                   {step === 3 && "Final Verification"}
                 </CardTitle>
                 <CardDescription className="font-medium">
-                  {step === 1 && "Tell us about yourself to begin your application."}
+                  {step === 1 && "Create your login and tell us about yourself."}
                   {step === 2 && "Share your professional skills and service availability."}
                   {step === 3 && "Finalize your application and agree to terms."}
                 </CardDescription>
@@ -158,6 +189,27 @@ export default function Register() {
                     <div className="space-y-2">
                       <Label htmlFor="email">Email Address</Label>
                       <Input id="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="john@example.com" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="password">Password</Label>
+                      <div className="relative">
+                        <Input 
+                          id="password" 
+                          type={showPassword ? "text" : "password"} 
+                          value={formData.password} 
+                          onChange={handleInputChange} 
+                          placeholder="Min 6 characters" 
+                          required 
+                          minLength={6}
+                        />
+                        <button 
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
+                        >
+                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="phone">Phone Number</Label>
@@ -234,12 +286,22 @@ export default function Register() {
                   <div />
                 )}
                 {step < 3 ? (
-                  <Button type="button" onClick={nextStep} className="bg-primary rounded-xl px-8 h-12 shadow-lg shadow-primary/20">
+                  <Button 
+                    type="button" 
+                    onClick={() => {
+                      if (step === 1 && (!formData.email || !formData.password || !formData.firstName)) {
+                        toast({ variant: "destructive", title: "Missing fields", description: "Please fill out all required fields." });
+                        return;
+                      }
+                      nextStep();
+                    }} 
+                    className="bg-primary rounded-xl px-8 h-12 shadow-lg shadow-primary/20"
+                  >
                     Next <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 ) : (
                   <Button type="submit" disabled={loading} className="bg-primary rounded-xl px-10 h-12 shadow-xl shadow-primary/30">
-                    {loading ? "Submitting..." : "Submit Application"}
+                    {loading ? "Creating Account..." : "Complete Registration"}
                   </Button>
                 )}
               </CardFooter>
