@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -103,8 +102,8 @@ export default function LoginPage() {
           <Image 
             src="https://firebasestorage.googleapis.com/v0/b/studio-3673070449-f277c.firebasestorage.app/o/CleanSweep-Layer%2011%20copy.png?alt=media&token=e060532e-cc86-43f8-8780-76371d95c936"
             alt="CleanSweep Logo"
-            width={140}
-            height={40}
+            width={180}
+            height={50}
             priority
           />
         </Link>

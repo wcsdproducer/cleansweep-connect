@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -18,8 +17,8 @@ export default function Home() {
           <Image 
             src="https://firebasestorage.googleapis.com/v0/b/studio-3673070449-f277c.firebasestorage.app/o/CleanSweep-Layer%2011%20copy.png?alt=media&token=e060532e-cc86-43f8-8780-76371d95c936"
             alt="CleanSweep Logo"
-            width={160}
-            height={45}
+            width={200}
+            height={55}
             priority
           />
         </Link>
@@ -185,8 +184,8 @@ export default function Home() {
             <Image 
               src="https://firebasestorage.googleapis.com/v0/b/studio-3673070449-f277c.firebasestorage.app/o/CleanSweep-Layer%2011%20copy.png?alt=media&token=e060532e-cc86-43f8-8780-76371d95c936"
               alt="CleanSweep Logo"
-              width={140}
-              height={40}
+              width={160}
+              height={45}
             />
           </Link>
           <p className="text-sm text-muted-foreground font-bold uppercase tracking-widest">© 2024 CleanSweep National. Provider Network.</p>
