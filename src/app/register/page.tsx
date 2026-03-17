@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Checkbox } from '@/checkbox';
 import { ArrowRight, ArrowLeft, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -116,48 +116,45 @@ export default function Register() {
         createdAt: serverTimestamp(),
       };
 
-      // 3. Perform Writes (Parallel but tracked)
+      // 3. Perform Writes
       const userDocRef = doc(db, 'users', user.uid);
       const providerDocRef = doc(db, 'serviceProviders', user.uid);
 
-      const writePromises = [
-        setDoc(userDocRef, userData).catch((err) => {
-          errorEmitter.emit('permission-error', new FirestorePermissionError({
-            path: userDocRef.path,
-            operation: 'create',
-            requestResourceData: userData,
-          }));
-          throw err;
-        }),
-        setDoc(providerDocRef, providerData, { merge: true }).catch((err) => {
-          errorEmitter.emit('permission-error', new FirestorePermissionError({
-            path: providerDocRef.path,
-            operation: 'create',
-            requestResourceData: providerData,
-          } satisfies SecurityRuleContext));
-          throw err;
-        })
-      ];
-
-      await Promise.all(writePromises);
-
-      // 4. Seeding (Optional/Non-blocking)
+      // We use individual try/catches for better error emitting, but await them to ensure success
       try {
-        await seedDatabaseIfEmpty(db);
-      } catch (seedError) {
-        console.warn("Database seeding skipped or failed:", seedError);
+        await setDoc(userDocRef, userData);
+      } catch (err: any) {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: userDocRef.path,
+          operation: 'create',
+          requestResourceData: userData,
+        }));
+        throw new Error(`Failed to create user profile: ${err.message}`);
       }
+
+      try {
+        await setDoc(providerDocRef, providerData, { merge: true });
+      } catch (err: any) {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: providerDocRef.path,
+          operation: 'create',
+          requestResourceData: providerData,
+        } satisfies SecurityRuleContext));
+        throw new Error(`Failed to create provider application: ${err.message}`);
+      }
+
+      // 4. Seeding (Non-blocking background task)
+      seedDatabaseIfEmpty(db).catch(console.warn);
       
       toast({
         title: "Registration Successful!",
-        description: "Welcome to CleanSweep.",
+        description: "Welcome to CleanSweep. Your dashboard is ready.",
       });
       
       router.push("/dashboard");
 
     } catch (error: any) {
       setLoading(false);
-      // Auth errors or Firestore write errors will be caught here
       toast({
         variant: "destructive",
         title: "Registration Failed",
