@@ -13,6 +13,7 @@ import { signInWithEmailAndPassword, signOut, signInWithPopup, GoogleAuthProvide
 import { doc, getDoc } from 'firebase/firestore';
 import { useAuth, useFirestore } from '@/firebase';
 import { Eye, EyeOff, Lock, Mail, ArrowRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -21,28 +22,39 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const auth = useAuth();
   const db = useFirestore();
+  const router = useRouter();
 
   const verifyRoleAndRedirect = async (uid: string) => {
     if (!db || !auth) return;
-    const userDoc = await getDoc(doc(db, 'users', uid));
-    const userData = userDoc.data();
+    
+    try {
+      const userDoc = await getDoc(doc(db, 'users', uid));
+      const userData = userDoc.data();
 
-    if (userData?.role !== 'Service Provider') {
-      await signOut(auth);
+      if (userData?.role !== 'Service Provider') {
+        await signOut(auth);
+        toast({
+          variant: "destructive",
+          title: "Access Denied",
+          description: "This application is restricted to Service Providers. If you are new, please register first.",
+        });
+        return false;
+      }
+      
+      toast({
+        title: "Welcome back!",
+        description: "Login successful.",
+      });
+      router.push("/dashboard");
+      return true;
+    } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Access Denied",
-        description: "This application is restricted to Service Providers only.",
+        title: "Verification Error",
+        description: "Could not verify account permissions.",
       });
       return false;
     }
-    
-    toast({
-      title: "Welcome back!",
-      description: "Login successful.",
-    });
-    window.location.href = "/dashboard";
-    return true;
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -72,11 +84,13 @@ export default function LoginPage() {
       const result = await signInWithPopup(auth, provider);
       await verifyRoleAndRedirect(result.user.uid);
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Google Login Failed",
-        description: error.message,
-      });
+      if (error.code !== 'auth/popup-closed-by-user') {
+        toast({
+          variant: "destructive",
+          title: "Google Login Failed",
+          description: error.message,
+        });
+      }
     } finally {
       setLoading(false);
     }

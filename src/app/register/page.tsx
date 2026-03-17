@@ -11,7 +11,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowRight, ArrowLeft, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { useFirestore, useAuth } from '@/firebase';
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -106,11 +106,13 @@ export default function Register() {
     try {
       await setDoc(userDocRef, userData, { merge: true });
       await setDoc(providerDocRef, providerData, { merge: true });
-      await seedDatabaseIfEmpty(db).catch(console.warn);
+      
+      // Seed if necessary, but don't block registration success
+      seedDatabaseIfEmpty(db).catch(err => console.warn("Seeding failed", err));
       
       toast({
         title: "Registration Successful!",
-        description: "Welcome to CleanSweep. Your dashboard is ready.",
+        description: "Welcome to CleanSweep.",
       });
       router.push("/dashboard");
     } catch (err: any) {
@@ -136,11 +138,13 @@ export default function Register() {
 
       await createProviderProfile(user.uid, user.email || '', firstName, lastName);
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Google Registration Failed",
-        description: error.message,
-      });
+      if (error.code !== 'auth/popup-closed-by-user') {
+        toast({
+          variant: "destructive",
+          title: "Google Registration Failed",
+          description: error.message,
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -154,7 +158,7 @@ export default function Register() {
       toast({
         variant: "destructive",
         title: "Agreement Required",
-        description: "Please accept the terms and background check consent to continue.",
+        description: "Please accept the terms and background check consent.",
       });
       return;
     }
@@ -327,7 +331,7 @@ export default function Register() {
                         <ShieldCheck className="w-5 h-5" /> Provider Agreement
                       </h4>
                       <p className="text-xs text-muted-foreground leading-relaxed">
-                        By submitting, you agree to a standard background check. You acknowledge that you are applying as an independent service provider and not an employee of CleanSweep.
+                        By submitting, you agree to a standard background check and acknowledge independent provider status.
                       </p>
                     </div>
                     <div className="flex items-start space-x-3">
