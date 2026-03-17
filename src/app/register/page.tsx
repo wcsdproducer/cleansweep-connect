@@ -35,6 +35,8 @@ export default function Register() {
     experience: '',
     teamSize: '1',
     expertise: [] as string[],
+    agreedToTerms: false,
+    consentedToBackground: false,
   });
 
   const nextStep = () => setStep(s => s + 1);
@@ -59,6 +61,16 @@ export default function Register() {
     e.preventDefault();
     if (!db || !auth) return;
     
+    // Final validation check for checkboxes
+    if (!formData.agreedToTerms || !formData.consentedToBackground) {
+      toast({
+        variant: "destructive",
+        title: "Agreement Required",
+        description: "Please accept the terms and background check consent to continue.",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -71,7 +83,7 @@ export default function Register() {
       const userData = {
         uid: user.uid,
         email: formData.email,
-        role: 'Service Provider', // Mandatory assignment
+        role: 'Service Provider',
         firstName: formData.firstName,
         lastName: formData.lastName,
         createdAt: serverTimestamp(),
@@ -87,9 +99,9 @@ export default function Register() {
 
       // 3. Create Service Provider Application Details
       const providerDocRef = doc(db, 'serviceProviders', user.uid);
-      const { password, ...providerDataWithoutPassword } = formData;
+      const { password, agreedToTerms, consentedToBackground, ...providerDataWithoutExtras } = formData;
       const providerData = {
-        ...providerDataWithoutPassword,
+        ...providerDataWithoutExtras,
         uid: user.uid,
         status: 'pending',
         createdAt: serverTimestamp(),
@@ -263,14 +275,22 @@ export default function Register() {
                       </p>
                     </div>
                     <div className="flex items-start space-x-3">
-                      <Checkbox id="terms" required />
-                      <label htmlFor="terms" className="text-sm text-muted-foreground font-medium leading-tight">
+                      <Checkbox 
+                        id="terms" 
+                        checked={formData.agreedToTerms}
+                        onCheckedChange={(checked) => setFormData(prev => ({ ...prev, agreedToTerms: !!checked }))}
+                      />
+                      <label htmlFor="terms" className="text-sm text-muted-foreground font-medium leading-tight cursor-pointer">
                         I agree to the <Link href="#" className="text-primary hover:underline">Terms of Service</Link> and <Link href="#" className="text-primary hover:underline">Privacy Policy</Link>.
                       </label>
                     </div>
                     <div className="flex items-start space-x-3">
-                      <Checkbox id="background" required />
-                      <label htmlFor="background" className="text-sm text-muted-foreground font-medium leading-tight">
+                      <Checkbox 
+                        id="background" 
+                        checked={formData.consentedToBackground}
+                        onCheckedChange={(checked) => setFormData(prev => ({ ...prev, consentedToBackground: !!checked }))}
+                      />
+                      <label htmlFor="background" className="text-sm text-muted-foreground font-medium leading-tight cursor-pointer">
                         I consent to a professional background check.
                       </label>
                     </div>
