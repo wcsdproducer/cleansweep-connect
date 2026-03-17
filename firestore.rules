@@ -3,9 +3,48 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // FORCE REDEPLOY: Updated at 2024-05-21T10:00:00Z to ensure wide-open permissions for development
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // User profiles: Users can only manage their own profile
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Service Provider registration: Providers can manage their own application
+    match /serviceProviders/{providerId} {
+      allow read, write: if isOwner(providerId);
+    }
+
+    // Provider Coverage: Providers manage their own service area
+    match /provider_coverage/{providerId} {
+      allow read, write: if isOwner(providerId);
+    }
+
+    // Jobs: For MVP, allowing authenticated users to manage jobs
+    match /jobs/{jobId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Messages: For MVP, allowing authenticated users to chat
+    match /messages/{messageId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Invoices: For MVP, allowing authenticated users to manage billing
+    match /invoices/{invoiceId} {
+      allow read, write: if isSignedIn();
+    }
+    
+    // Default fallback
     match /{document=**} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
   }
 }

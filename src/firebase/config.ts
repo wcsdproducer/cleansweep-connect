@@ -1,3 +1,4 @@
+
 'use client';
 
 // The Firebase configuration is provided via environment variables.
