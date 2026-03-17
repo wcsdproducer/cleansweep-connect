@@ -25,7 +25,7 @@ export default function Home() {
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-8 items-center">
           <Link className="text-sm font-bold text-foreground/70 hover:text-primary transition-colors hidden md:block" href="#benefits">
-            Benefits
+            Provider Benefits
           </Link>
           <Link href="/register">
             <Button variant="outline" className="hidden sm:inline-flex border-primary text-primary hover:bg-primary hover:text-white rounded-xl font-bold">
@@ -33,7 +33,7 @@ export default function Home() {
             </Button>
           </Link>
           <Link href="/login">
-            <Button className="bg-primary hover:bg-primary/90 text-white rounded-xl px-6 font-bold shadow-lg shadow-primary/20">Sign In</Button>
+            <Button className="bg-primary hover:bg-primary/90 text-white rounded-xl px-6 font-bold shadow-lg shadow-primary/20">Provider Login</Button>
           </Link>
         </nav>
       </header>
@@ -60,24 +60,26 @@ export default function Home() {
           <div className="container relative z-10 px-6 mx-auto">
             <div className="flex flex-col space-y-8 max-w-2xl animate-in fade-in slide-in-from-left-8 duration-700">
               <div className="inline-flex items-center px-4 py-2 rounded-full bg-primary/20 text-primary font-bold text-sm w-fit backdrop-blur-sm">
-                <Star className="w-4 h-4 mr-2 fill-primary" />
-                Rated 4.9/5 by Professionals
+                <Sparkles className="w-4 h-4 mr-2 fill-primary" />
+                Join the #1 Platform for Cleaning Pros
               </div>
               <h1 className="text-foreground font-extrabold leading-[1.1]">
-                Reclaim Your Time with <span className="text-primary">CleanSweep</span>
+                Grow Your Cleaning Business with <span className="text-primary">CleanSweep</span>
               </h1>
               <p className="text-muted-foreground text-xl font-medium max-w-lg leading-relaxed">
-                Professional home cleaning services tailored to your life. From recurring visits to deep cleans, we bring the sparkle back to your space.
+                Connect with high-quality clients, set your own schedule, and get paid weekly. We handle the bookings so you can focus on the work.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Link href="/register">
                   <Button size="lg" className="h-16 px-10 text-lg bg-primary hover:bg-primary/90 text-white rounded-2xl shadow-2xl shadow-primary/30 w-full sm:w-auto font-bold transition-all hover:scale-105">
-                    Get Started Now <ChevronRight className="ml-2 w-5 h-5" />
+                    Start Your Application <ChevronRight className="ml-2 w-5 h-5" />
                   </Button>
                 </Link>
-                <Button size="lg" variant="secondary" className="h-16 px-10 text-lg rounded-2xl w-full sm:w-auto font-bold bg-white/50 backdrop-blur-md">
-                  View Our Services
-                </Button>
+                <Link href="#benefits">
+                  <Button size="lg" variant="secondary" className="h-16 px-10 text-lg rounded-2xl w-full sm:w-auto font-bold bg-white/50 backdrop-blur-md">
+                    Learn How It Works
+                  </Button>
+                </Link>
               </div>
               
               <div className="flex items-center gap-4 pt-8">
@@ -85,8 +87,8 @@ export default function Home() {
                   <CheckCircle className="w-6 h-6" />
                 </div>
                 <div>
-                  <h4 className="text-foreground text-lg font-bold">Bonded & Insured</h4>
-                  <p className="text-muted-foreground font-medium">Your home is safe in our hands.</p>
+                  <h4 className="text-foreground text-lg font-bold">Industry-Leading Pay</h4>
+                  <p className="text-muted-foreground font-medium">Keep more of what you earn with our transparent fee structure.</p>
                 </div>
               </div>
             </div>
@@ -97,24 +99,24 @@ export default function Home() {
         <section id="benefits" className="py-32 bg-secondary/50">
           <div className="container px-6 mx-auto">
             <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
-              <h2 className="text-foreground font-bold">Why Partner With Us?</h2>
-              <p className="text-muted-foreground text-lg font-medium">We provide the tools you need to grow your independent cleaning business.</p>
+              <h2 className="text-foreground font-bold">Why CleanSweep for Pros?</h2>
+              <p className="text-muted-foreground text-lg font-medium">We provide the tools and clients you need to run a successful independent cleaning business.</p>
             </div>
             <div className="grid md:grid-cols-3 gap-10">
               {[
                 {
                   title: "Flexible Schedule",
-                  desc: "Work when you want. Set your own availability and choose the jobs that fit your lifestyle.",
+                  desc: "You're the boss. Set your own availability and choose only the jobs that fit your lifestyle and location.",
                   icon: Zap,
                 },
                 {
-                  title: "Steady Income",
-                  desc: "No more hunting for clients. We provide a consistent stream of jobs every single week.",
+                  title: "Steady Stream of Jobs",
+                  desc: "Stop spending money on marketing. We bring a constant flow of bookings directly to your dashboard.",
                   icon: Users,
                 },
                 {
-                  title: "Weekly Payments",
-                  desc: "Get paid directly to your bank account every week. No invoicing headaches or payment delays.",
+                  title: "Fast Weekly Payouts",
+                  desc: "Get paid directly to your bank account every single week. No more chasing clients or waiting for checks.",
                   icon: Briefcase,
                 },
               ].map((benefit, idx) => (
@@ -138,13 +140,13 @@ export default function Home() {
           <div className="container px-6 mx-auto relative z-10">
             <div className="grid lg:grid-cols-2 gap-20 items-center">
               <div className="space-y-12">
-                <h2 className="text-white text-5xl font-extrabold leading-tight">Ready to Join the Team?</h2>
+                <h2 className="text-white text-5xl font-extrabold leading-tight">Ready to Be Your Own Boss?</h2>
                 <ul className="space-y-8">
                   {[
-                    "Background checks included",
-                    "Insurance coverage provided",
-                    "CleanSweep brand credibility",
-                    "Advanced mobile dashboard",
+                    "Professional liability insurance coverage",
+                    "Marketing and client booking handled for you",
+                    "Dedicated provider support team",
+                    "Advanced mobile dashboard for business management",
                   ].map((item, idx) => (
                     <li key={idx} className="flex items-center gap-6 text-2xl font-bold">
                       <div className="w-10 h-10 rounded-2xl bg-accent flex items-center justify-center text-accent-foreground shadow-lg">
@@ -156,7 +158,7 @@ export default function Home() {
                 </ul>
                 <Link href="/register">
                   <Button size="lg" className="h-20 px-14 text-2xl text-accent-foreground bg-accent hover:bg-accent/90 rounded-[2rem] shadow-2xl shadow-accent/30 border-none transition-all hover:scale-105 font-extrabold">
-                    Start Your Application
+                    Apply to Join Now
                   </Button>
                 </Link>
               </div>
@@ -187,10 +189,10 @@ export default function Home() {
               height={40}
             />
           </Link>
-          <p className="text-sm text-muted-foreground font-bold uppercase tracking-widest">© 2024 CleanSweep National. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground font-bold uppercase tracking-widest">© 2024 CleanSweep National. Provider Network.</p>
           <div className="flex gap-10">
+            <Link className="text-sm font-extrabold text-muted-foreground hover:text-primary transition-colors" href="#">Provider Agreement</Link>
             <Link className="text-sm font-extrabold text-muted-foreground hover:text-primary transition-colors" href="#">Privacy</Link>
-            <Link className="text-sm font-extrabold text-muted-foreground hover:text-primary transition-colors" href="#">Terms</Link>
             <Link className="text-sm font-extrabold text-muted-foreground hover:text-primary transition-colors" href="#">Support</Link>
           </div>
         </div>
