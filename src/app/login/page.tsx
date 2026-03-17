@@ -24,27 +24,32 @@ export default function LoginPage() {
   const db = useFirestore();
   const router = useRouter();
 
-  const verifyUserRole = async (uid: string) => {
+  const verifyUserRoleAndRedirect = async (uid: string) => {
     if (!db || !auth) return;
     try {
+      // Check for the role in the 'users' collection
       const userDoc = await getDoc(doc(db, 'users', uid));
       const userData = userDoc.data();
 
       if (!userData || userData.role !== 'Service Provider') {
+        // If they exist but aren't a service provider, log them out
         await signOut(auth);
         toast({
           variant: "destructive",
-          title: "Access Denied",
-          description: "This portal is reserved for verified Service Providers.",
+          title: "Portal Access Restricted",
+          description: "This portal is strictly for verified Service Providers.",
         });
         return;
       }
+      
+      toast({ title: "Welcome back!", description: `Logged in as ${userData.firstName}.` });
       router.push("/dashboard");
     } catch (error: any) {
+      console.error("Role Verification Error:", error);
       toast({
         variant: "destructive",
-        title: "Verification Failed",
-        description: "We couldn't verify your credentials.",
+        title: "Session Error",
+        description: "We couldn't verify your provider status. Please contact support.",
       });
     }
   };
@@ -55,12 +60,17 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
-      await verifyUserRole(result.user.uid);
+      await verifyUserRoleAndRedirect(result.user.uid);
     } catch (error: any) {
+      console.error("Login Error:", error);
+      let message = "Invalid email or password.";
+      if (error.code === 'auth/user-not-found') message = "Account not found.";
+      if (error.code === 'auth/wrong-password') message = "Incorrect password.";
+      
       toast({
         variant: "destructive",
         title: "Login Failed",
-        description: "Invalid credentials or account blocked.",
+        description: message,
       });
     } finally {
       setLoading(false);
@@ -74,7 +84,7 @@ export default function LoginPage() {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       if (result.user) {
-        await verifyUserRole(result.user.uid);
+        await verifyUserRoleAndRedirect(result.user.uid);
       }
     } catch (error: any) {
       toast({
@@ -109,20 +119,23 @@ export default function LoginPage() {
                 <ShieldCheck className="w-8 h-8" />
               </div>
             </div>
-            <CardTitle className="text-3xl text-primary font-bold">Provider Portal</CardTitle>
-            <CardDescription className="font-bold">Access your dashboard.</CardDescription>
+            <CardTitle className="text-3xl text-primary font-bold font-headline">Provider Portal</CardTitle>
+            <CardDescription className="font-bold text-muted-foreground">Log in to manage your schedule and earnings.</CardDescription>
           </CardHeader>
           <CardContent className="p-10 space-y-6">
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Email Address</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10 h-12 rounded-xl" required />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="password">Password</Label>
+                  <Link href="#" className="text-xs text-primary font-bold hover:underline">Forgot?</Link>
+                </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 h-12 rounded-xl" required />
@@ -131,23 +144,23 @@ export default function LoginPage() {
                   </button>
                 </div>
               </div>
-              <Button type="submit" disabled={loading} className="w-full h-14 bg-primary text-white rounded-2xl font-bold text-lg shadow-xl shadow-primary/20">
-                {loading ? "Logging in..." : "Login"}
+              <Button type="submit" disabled={loading} className="w-full h-14 bg-primary text-white rounded-2xl font-bold text-lg shadow-xl shadow-primary/20 transition-all active:scale-95">
+                {loading ? "Securing Session..." : "Log In to Dashboard"}
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </form>
             <div className="relative py-2">
               <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-              <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-4 text-muted-foreground font-bold">Or</span></div>
+              <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-4 text-muted-foreground font-bold">Quick Access</span></div>
             </div>
-            <Button variant="outline" onClick={handleGoogleLogin} disabled={loading} className="w-full h-14 rounded-2xl font-bold border-primary/20 hover:bg-primary/5">
+            <Button variant="outline" onClick={handleGoogleLogin} disabled={loading} className="w-full h-14 rounded-2xl font-bold border-primary/20 hover:bg-primary/5 transition-all">
               <Image src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width={24} height={24} className="mr-3" />
               Login with Google
             </Button>
           </CardContent>
           <CardFooter className="p-10 pt-0 text-center">
             <p className="w-full text-sm font-medium text-muted-foreground">
-              Need a partner account? <Link href="/register" className="text-primary font-bold hover:underline">Join CleanSweep</Link>
+              New partner? <Link href="/register" className="text-primary font-bold hover:underline">Join CleanSweep Network</Link>
             </p>
           </CardFooter>
         </Card>
