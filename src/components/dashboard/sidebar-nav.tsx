@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -23,6 +24,8 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from '@/components/ui/sidebar';
+import { useAuth } from '@/firebase';
+import { signOut } from 'firebase/auth';
 
 const navItems = [
   { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
@@ -38,11 +41,19 @@ const secondaryItems = [
 
 export function SidebarNav() {
   const pathname = usePathname();
+  const auth = useAuth();
+
+  const handleLogout = async () => {
+    if (auth) {
+      await signOut(auth);
+      window.location.href = "/";
+    }
+  };
 
   return (
     <Sidebar variant="sidebar" className="border-r border-sidebar-border bg-sidebar">
       <SidebarHeader className="h-20 flex items-center px-6 border-b border-sidebar-border">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/dashboard" className="flex items-center gap-2">
           <ShieldCheck className="text-primary w-6 h-6" />
           <span className="font-bold text-lg text-sidebar-foreground font-headline tracking-tight">CleanSweep</span>
         </Link>
@@ -92,12 +103,13 @@ export function SidebarNav() {
       </SidebarContent>
       <SidebarFooter className="p-4 mt-auto">
         <SidebarSeparator className="mb-4 bg-sidebar-border" />
-        <Link href="/">
-          <button className="flex items-center gap-3 px-3 py-2.5 w-full text-sidebar-foreground/60 hover:text-destructive transition-colors rounded-xl hover:bg-destructive/5">
-            <LogOut className="w-5 h-5" />
-            <span className="font-semibold text-sm">Logout</span>
-          </button>
-        </Link>
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-3 py-2.5 w-full text-sidebar-foreground/60 hover:text-destructive transition-colors rounded-xl hover:bg-destructive/5"
+        >
+          <LogOut className="w-5 h-5" />
+          <span className="font-semibold text-sm">Logout</span>
+        </button>
       </SidebarFooter>
     </Sidebar>
   );

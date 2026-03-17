@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -31,7 +32,7 @@ export default function Home() {
               Join as Provider
             </Button>
           </Link>
-          <Link href="/dashboard">
+          <Link href="/login">
             <Button className="bg-primary hover:bg-primary/90 text-white rounded-xl px-6 font-bold shadow-lg shadow-primary/20">Sign In</Button>
           </Link>
         </nav>
