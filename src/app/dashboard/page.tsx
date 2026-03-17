@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,26 +10,31 @@ import {
   Star, 
   Clock, 
   ArrowRight,
-  TrendingUp,
   MapPin,
   CheckCircle2,
-  Sparkles
+  MessageSquare
 } from 'lucide-react';
 import Link from 'next/link';
-
-const upcomingJobs = [
-  { id: 1, client: "Sarah Jenkins", time: "Tomorrow, 09:00 AM", type: "Deep Clean", status: "Confirmed", price: "$120" },
-  { id: 2, client: "TechFlow Offices", time: "Fri, 06:00 PM", type: "Commercial", status: "Pending", price: "$450" },
-  { id: 3, client: "Michael Chen", time: "Sat, 11:30 AM", type: "Residential", status: "Confirmed", price: "$85" },
-];
+import { useFirestore, useCollection } from '@/firebase';
+import { collection, query, orderBy, limit } from 'firebase/firestore';
+import { cn } from '@/lib/utils';
 
 export default function Dashboard() {
+  const db = useFirestore();
+
+  const jobsQuery = useMemo(() => {
+    if (!db) return null;
+    return query(collection(db, 'jobs'), orderBy('createdAt', 'desc'), limit(5));
+  }, [db]);
+
+  const { data: jobs, loading: jobsLoading } = useCollection(jobsQuery);
+
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
         <div>
-          <h1 className="text-foreground tracking-tight">Welcome back, Alex!</h1>
-          <p className="text-muted-foreground mt-1">You have 3 jobs scheduled for this week.</p>
+          <h1 className="text-foreground tracking-tight">Welcome back!</h1>
+          <p className="text-muted-foreground mt-1">You have {jobs?.length || 0} jobs scheduled for this week.</p>
         </div>
         <div className="flex items-center gap-4">
           <Link href="/dashboard/schedule">
@@ -62,19 +68,19 @@ export default function Dashboard() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-10">
-        {/* Next Job Card - Premium Brand Card Style */}
+        {/* Next Job Card */}
         <Card className="lg:col-span-2 shadow-2xl border-none overflow-hidden group rounded-[2.5rem] bg-white">
           <div className="bg-primary p-10 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
             <div className="relative z-10">
               <div className="flex justify-between items-center mb-6">
                 <Badge variant="secondary" className="bg-accent text-accent-foreground border-none px-4 py-1.5 font-bold uppercase tracking-widest text-[10px]">Upcoming Job</Badge>
-                <span className="text-white/80 font-semibold">Today, 02:00 PM</span>
+                <span className="text-white/80 font-semibold">{jobs?.[0]?.time || 'No upcoming jobs'}</span>
               </div>
-              <h2 className="text-white text-3xl font-bold mb-3">Residential Cleaning - Sarah Jenkins</h2>
+              <h2 className="text-white text-3xl font-bold mb-3">{jobs?.[0]?.type} - {jobs?.[0]?.clientName}</h2>
               <div className="flex items-center gap-2 text-white/90 font-medium">
                 <MapPin className="w-5 h-5 text-accent" />
-                <span>123 Highland Ave, Oak Park, IL</span>
+                <span>{jobs?.[0]?.address || '---'}</span>
               </div>
             </div>
           </div>
@@ -82,7 +88,7 @@ export default function Dashboard() {
             <div className="grid sm:grid-cols-2 gap-10 mb-10">
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">Estimated Pay</p>
-                <p className="text-3xl font-bold text-primary">$120.00</p>
+                <p className="text-3xl font-bold text-primary">${jobs?.[0]?.price || '0.00'}</p>
               </div>
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">Duration</p>
@@ -132,19 +138,19 @@ export default function Dashboard() {
         </CardHeader>
         <CardContent className="p-0">
           <div className="divide-y divide-secondary">
-            {upcomingJobs.map((job) => (
-              <div key={job.id} className="p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:bg-secondary/20 transition-all">
+            {jobs?.map((job: any, i: number) => (
+              <div key={i} className="p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:bg-secondary/20 transition-all">
                 <div className="flex items-center gap-6">
                   <div className="w-16 h-16 bg-primary/5 text-primary rounded-2xl flex items-center justify-center font-bold text-2xl shadow-inner">
-                    {job.client.charAt(0)}
+                    {job.clientName.charAt(0)}
                   </div>
                   <div>
-                    <h4 className="font-bold text-foreground text-xl">{job.client}</h4>
+                    <h4 className="font-bold text-foreground text-xl">{job.clientName}</h4>
                     <p className="text-sm text-muted-foreground font-medium">{job.type} • {job.time}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-6 self-end sm:self-auto">
-                  <span className="font-bold text-2xl text-primary">{job.price}</span>
+                  <span className="font-bold text-2xl text-primary">${job.price}</span>
                   <Badge className={cn(
                     "px-4 py-1.5 rounded-full font-bold text-[10px] uppercase tracking-widest",
                     job.status === "Confirmed" ? "bg-accent text-accent-foreground" : "bg-secondary text-primary"
@@ -160,6 +166,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
-import { MessageSquare } from 'lucide-react';
-import { cn } from '@/lib/utils';

@@ -1,8 +1,7 @@
-
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,26 +19,21 @@ import {
 } from 'lucide-react';
 import { aiMessagingAssistant } from '@/ai/flows/ai-messaging-assistant';
 import { toast } from '@/hooks/use-toast';
-
-const conversations = [
-  { id: 1, name: "Sarah Jenkins", role: "Client", lastMsg: "See you tomorrow at 9!", time: "10:30 AM", unread: 0, online: true },
-  { id: 2, name: "Admin (Mike)", role: "Company", lastMsg: "Payment processed successfully.", time: "Yesterday", unread: 2, online: true },
-  { id: 3, name: "David Wilson", role: "Client", lastMsg: "Can we move to 2 PM?", time: "Wed", unread: 0, online: false },
-  { id: 4, name: "Lisa Thompson", role: "Client", lastMsg: "Great job on the kitchen!", time: "Mon", unread: 0, online: false },
-];
-
-const initialMessages = [
-  { id: 1, sender: 'client', text: "Hello! Just confirming our cleaning appointment for tomorrow at 9:00 AM.", time: "10:15 AM" },
-  { id: 2, sender: 'provider', text: "Yes, I'll be there! I have everything I need.", time: "10:20 AM" },
-  { id: 3, sender: 'client', text: "Perfect. Also, could you focus a bit more on the guest bathroom? We have family coming over this weekend.", time: "10:25 AM" },
-  { id: 4, sender: 'client', text: "And let me know if you need the gate code again.", time: "10:30 AM" },
-];
+import { useFirestore, useCollection } from '@/firebase';
+import { collection, query, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function MessagesPage() {
-  const [messages, setMessages] = useState(initialMessages);
+  const db = useFirestore();
   const [inputText, setInputText] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const messagesQuery = useMemo(() => {
+    if (!db) return null;
+    return query(collection(db, 'messages'), orderBy('createdAt', 'asc'));
+  }, [db]);
+
+  const { data: messages } = useCollection(messagesQuery);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -47,19 +41,22 @@ export default function MessagesPage() {
     }
   }, [messages]);
 
-  const handleSendMessage = () => {
-    if (!inputText.trim()) return;
-    const newMessage = {
-      id: messages.length + 1,
-      sender: 'provider',
-      text: inputText,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-    setMessages([...messages, newMessage]);
+  const handleSendMessage = async () => {
+    if (!inputText.trim() || !db) return;
+    
+    const text = inputText;
     setInputText("");
+
+    addDoc(collection(db, 'messages'), {
+      sender: 'provider',
+      text,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      createdAt: serverTimestamp()
+    });
   };
 
   const generateAiReply = async () => {
+    if (!messages?.length) return;
     setIsAiLoading(true);
     try {
       const lastMsg = messages[messages.length - 1];
@@ -112,17 +109,15 @@ export default function MessagesPage() {
           </CardHeader>
           <ScrollArea className="flex-1">
             <div className="divide-y">
-              {conversations.map((convo) => (
+              {[
+                { id: 1, name: "Sarah Jenkins", role: "Client", lastMsg: "See you tomorrow!", time: "10:30 AM", online: true },
+                { id: 2, name: "Admin (Mike)", role: "Company", lastMsg: "Payment processed.", time: "Yesterday", online: true },
+              ].map((convo) => (
                 <div key={convo.id} className="p-4 flex items-center gap-3 hover:bg-muted/50 cursor-pointer transition-colors relative">
-                  <div className="relative">
-                    <Avatar className="w-12 h-12 border">
-                      <AvatarImage src={`https://picsum.photos/seed/${convo.id}/100/100`} />
-                      <AvatarFallback>{convo.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    {convo.online && (
-                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
-                    )}
-                  </div>
+                  <Avatar className="w-12 h-12 border">
+                    <AvatarImage src={`https://picsum.photos/seed/${convo.id}/100/100`} />
+                    <AvatarFallback>{convo.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center mb-1">
                       <h4 className="font-bold text-sm truncate text-primary">{convo.name}</h4>
@@ -130,11 +125,6 @@ export default function MessagesPage() {
                     </div>
                     <p className="text-xs text-muted-foreground truncate">{convo.lastMsg}</p>
                   </div>
-                  {convo.unread > 0 && (
-                    <div className="w-5 h-5 bg-accent text-white rounded-full text-[10px] flex items-center justify-center font-bold">
-                      {convo.unread}
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
@@ -166,8 +156,8 @@ export default function MessagesPage() {
 
           <ScrollArea className="flex-1 p-6" ref={scrollRef}>
             <div className="space-y-6">
-              {messages.map((msg) => (
-                <div key={msg.id} className={`flex ${msg.sender === 'provider' ? 'justify-end' : 'justify-start'}`}>
+              {messages?.map((msg: any, i: number) => (
+                <div key={i} className={`flex ${msg.sender === 'provider' ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[75%] rounded-2xl p-4 ${
                     msg.sender === 'provider' 
                       ? 'bg-primary text-white rounded-tr-none' 

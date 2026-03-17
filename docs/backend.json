@@ -17,6 +17,44 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["firstName", "lastName", "email"]
+    },
+    "Job": {
+      "title": "Job",
+      "description": "A scheduled cleaning service job.",
+      "type": "object",
+      "properties": {
+        "clientName": { "type": "string" },
+        "type": { "type": "string" },
+        "time": { "type": "string" },
+        "address": { "type": "string" },
+        "status": { "type": "string", "enum": ["Confirmed", "Pending", "Completed"] },
+        "price": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Message": {
+      "title": "Message",
+      "description": "A message in a conversation thread.",
+      "type": "object",
+      "properties": {
+        "sender": { "type": "string", "enum": ["client", "admin", "provider"] },
+        "text": { "type": "string" },
+        "time": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Invoice": {
+      "title": "Invoice",
+      "description": "A payment record for a completed job.",
+      "type": "object",
+      "properties": {
+        "invoiceId": { "type": "string" },
+        "date": { "type": "string" },
+        "amount": { "type": "string" },
+        "status": { "type": "string", "enum": ["Paid", "Processing", "Pending"] },
+        "client": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "auth": {
@@ -26,6 +64,18 @@
     "serviceProviders/{providerId}": {
       "schema": "ServiceProvider",
       "description": "Registration records for cleaning service providers."
+    },
+    "jobs/{jobId}": {
+      "schema": "Job",
+      "description": "Scheduled cleaning jobs."
+    },
+    "messages/{messageId}": {
+      "schema": "Message",
+      "description": "Chat messages."
+    },
+    "invoices/{invoiceId}": {
+      "schema": "Invoice",
+      "description": "Billing records."
     }
   }
 }

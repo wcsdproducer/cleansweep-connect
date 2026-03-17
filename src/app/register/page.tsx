@@ -14,6 +14,7 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
+import { seedDatabaseIfEmpty } from '@/lib/seed';
 
 export default function Register() {
   const [step, setStep] = useState(1);
@@ -65,7 +66,10 @@ export default function Register() {
     };
 
     setDoc(docRef, providerData, { merge: true })
-      .then(() => {
+      .then(async () => {
+        // Seed the database if this is the first provider
+        await seedDatabaseIfEmpty(db);
+        
         setLoading(false);
         toast({
           title: "Application Submitted",

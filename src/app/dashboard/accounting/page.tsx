@@ -1,6 +1,6 @@
-
 "use client";
 
+import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -8,11 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Wallet, 
   ArrowUpRight, 
-  ArrowDownLeft, 
   FileText, 
   Download,
-  Calendar,
-  DollarSign
+  TrendingUp
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -24,6 +22,8 @@ import {
   ResponsiveContainer,
   Cell
 } from 'recharts';
+import { useFirestore, useCollection } from '@/firebase';
+import { collection, query, orderBy } from 'firebase/firestore';
 
 const data = [
   { month: 'Jan', earnings: 1200 },
@@ -34,14 +34,16 @@ const data = [
   { month: 'Jun', earnings: 2500 },
 ];
 
-const invoices = [
-  { id: "INV-1024", date: "Jul 15, 2024", amount: "$450.00", status: "Paid", client: "TechFlow Offices" },
-  { id: "INV-1023", date: "Jul 12, 2024", amount: "$120.00", status: "Paid", client: "Sarah Jenkins" },
-  { id: "INV-1022", date: "Jul 10, 2024", amount: "$85.00", status: "Processing", client: "Michael Chen" },
-  { id: "INV-1021", date: "Jul 05, 2024", amount: "$220.00", status: "Paid", client: "Emily Davis" },
-];
-
 export default function AccountingPage() {
+  const db = useFirestore();
+
+  const invoicesQuery = useMemo(() => {
+    if (!db) return null;
+    return query(collection(db, 'invoices'), orderBy('createdAt', 'desc'));
+  }, [db]);
+
+  const { data: invoices } = useCollection(invoicesQuery);
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -152,11 +154,11 @@ export default function AccountingPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {invoices.map((inv) => (
-                  <TableRow key={inv.id} className="cursor-pointer group">
+                {invoices?.map((inv: any, i: number) => (
+                  <TableRow key={i} className="cursor-pointer group">
                     <TableCell className="font-medium text-primary pl-6">
                       <div className="flex flex-col">
-                        <span>{inv.id}</span>
+                        <span>{inv.invoiceId}</span>
                         <span className="text-[10px] text-muted-foreground font-normal">{inv.date}</span>
                       </div>
                     </TableCell>
@@ -180,5 +182,3 @@ export default function AccountingPage() {
     </div>
   );
 }
-
-import { TrendingUp } from 'lucide-react';

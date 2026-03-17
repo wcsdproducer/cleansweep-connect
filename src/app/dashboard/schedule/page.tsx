@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
@@ -15,14 +14,19 @@ import {
   MoreVertical,
   CheckCircle2
 } from 'lucide-react';
-
-const dayJobs = [
-  { id: 1, client: "Sarah Jenkins", time: "09:00 AM - 12:00 PM", address: "123 Highland Ave, Oak Park, IL", type: "Deep Clean", pay: "$120" },
-  { id: 2, client: "Michael Chen", time: "02:00 PM - 04:00 PM", address: "455 North St, Apt 4B, Chicago, IL", type: "Residential", pay: "$85" },
-];
+import { useFirestore, useCollection } from '@/firebase';
+import { collection, query, orderBy } from 'firebase/firestore';
 
 export default function SchedulePage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const db = useFirestore();
+
+  const jobsQuery = useMemo(() => {
+    if (!db) return null;
+    return query(collection(db, 'jobs'), orderBy('createdAt', 'desc'));
+  }, [db]);
+
+  const { data: jobs } = useCollection(jobsQuery);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -85,18 +89,18 @@ export default function SchedulePage() {
           </div>
 
           <div className="space-y-4">
-            {dayJobs.map((job) => (
-              <Card key={job.id} className="border-none shadow-sm hover:shadow-md transition-shadow group overflow-hidden">
+            {jobs?.map((job: any, i: number) => (
+              <Card key={i} className="border-none shadow-sm hover:shadow-md transition-shadow group overflow-hidden">
                 <div className="flex flex-col md:flex-row">
                   <div className="w-2 bg-primary group-hover:bg-accent transition-colors" />
                   <div className="flex-1 p-6">
                     <div className="flex justify-between items-start mb-4">
                       <div>
-                        <h3 className="text-xl font-bold text-primary mb-1">{job.client}</h3>
+                        <h3 className="text-xl font-bold text-primary mb-1">{job.clientName}</h3>
                         <Badge variant="secondary" className="bg-primary/10 text-primary border-none">{job.type}</Badge>
                       </div>
                       <div className="text-right">
-                        <span className="text-2xl font-bold text-primary">{job.pay}</span>
+                        <span className="text-2xl font-bold text-primary">${job.price}</span>
                         <p className="text-xs text-muted-foreground">Estimated</p>
                       </div>
                     </div>
@@ -119,7 +123,7 @@ export default function SchedulePage() {
                 </div>
               </Card>
             ))}
-            {dayJobs.length === 0 && (
+            {(!jobs || jobs.length === 0) && (
               <div className="py-20 flex flex-col items-center justify-center text-center space-y-4 bg-white rounded-xl shadow-sm border border-dashed border-muted-foreground/20">
                 <div className="w-20 h-20 bg-muted/30 rounded-full flex items-center justify-center text-muted-foreground">
                   <CheckCircle2 className="w-10 h-10" />
