@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { CheckCircle, ShieldCheck, Zap, Star, Users, Briefcase, ChevronRight, Sparkles } from 'lucide-react';
+import { CheckCircle, ShieldCheck, Zap, Star, Users, Briefcase, ChevronRight, Sparkles, Check } from 'lucide-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function Home() {
@@ -17,8 +17,8 @@ export default function Home() {
           <Image 
             src="https://firebasestorage.googleapis.com/v0/b/studio-3673070449-f277c.firebasestorage.app/o/CleanSweep-Layer%2011%20copy.png?alt=media&token=e060532e-cc86-43f8-8780-76371d95c936"
             alt="CleanSweep Logo"
-            width={200}
-            height={55}
+            width={220}
+            height={60}
             priority
           />
         </Link>
@@ -133,35 +133,36 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Call to Action */}
-        <section className="py-32 bg-primary text-white overflow-hidden relative">
-          <div className="absolute top-0 right-0 w-1/3 h-full bg-white/5 -skew-x-12 transform translate-x-1/2" />
+        {/* Call to Action - Refined Recruitment Section */}
+        <section className="py-24 bg-primary text-white overflow-hidden relative">
           <div className="container px-6 mx-auto relative z-10">
-            <div className="grid lg:grid-cols-2 gap-20 items-center">
-              <div className="space-y-12">
-                <h2 className="text-white text-5xl font-extrabold leading-tight">Ready to Be Your Own Boss?</h2>
-                <ul className="space-y-8">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              <div className="space-y-10">
+                <h2 className="text-white text-5xl font-extrabold leading-tight tracking-tight">
+                  Ready to Be Your Own Boss?
+                </h2>
+                <ul className="space-y-6">
                   {[
                     "Professional liability insurance coverage",
                     "Marketing and client booking handled for you",
                     "Dedicated provider support team",
                     "Advanced mobile dashboard for business management",
                   ].map((item, idx) => (
-                    <li key={idx} className="flex items-center gap-6 text-2xl font-bold">
-                      <div className="w-10 h-10 rounded-2xl bg-accent flex items-center justify-center text-accent-foreground shadow-lg">
-                        <CheckCircle className="w-6 h-6" />
+                    <li key={idx} className="flex items-center gap-4 text-xl font-semibold">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent flex items-center justify-center text-accent-foreground">
+                        <Check className="w-5 h-5 stroke-[3px]" />
                       </div>
-                      {item}
+                      <span>{item}</span>
                     </li>
                   ))}
                 </ul>
                 <Link href="/register">
-                  <Button size="lg" className="h-20 px-14 text-2xl text-accent-foreground bg-accent hover:bg-accent/90 rounded-[2rem] shadow-2xl shadow-accent/30 border-none transition-all hover:scale-105 font-extrabold">
+                  <Button size="lg" className="h-16 px-10 text-xl text-primary font-bold bg-accent hover:bg-accent/90 rounded-2xl shadow-xl shadow-black/10 border-none transition-all hover:scale-105">
                     Apply to Join Now
                   </Button>
                 </Link>
               </div>
-              <div className="hidden lg:block relative h-[600px] w-full rounded-[4rem] overflow-hidden shadow-2xl border border-white/10">
+              <div className="relative h-[500px] w-full lg:h-[600px] rounded-[3rem] lg:rounded-[5rem] overflow-hidden shadow-2xl">
                 {teamImg && (
                   <Image
                     src={teamImg.imageUrl}
@@ -171,7 +172,6 @@ export default function Home() {
                     data-ai-hint={teamImg.imageHint}
                   />
                 )}
-                <div className="absolute inset-0 ring-1 ring-inset ring-white/10" />
               </div>
             </div>
           </div>
@@ -184,8 +184,8 @@ export default function Home() {
             <Image 
               src="https://firebasestorage.googleapis.com/v0/b/studio-3673070449-f277c.firebasestorage.app/o/CleanSweep-Layer%2011%20copy.png?alt=media&token=e060532e-cc86-43f8-8780-76371d95c936"
               alt="CleanSweep Logo"
-              width={160}
-              height={45}
+              width={180}
+              height={50}
             />
           </Link>
           <p className="text-sm text-muted-foreground font-bold uppercase tracking-widest">© 2024 CleanSweep National. Provider Network.</p>
