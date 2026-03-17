@@ -137,11 +137,11 @@ export default function Home() {
         <section className="py-24 bg-primary text-white overflow-hidden relative">
           <div className="container px-6 mx-auto relative z-10">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div className="space-y-10">
+              <div className="flex flex-col gap-10">
                 <h2 className="text-white text-5xl font-extrabold leading-tight tracking-tight">
                   Ready to Be Your Own Boss?
                 </h2>
-                <ul className="space-y-6">
+                <ul className="flex flex-col gap-6">
                   {[
                     "Professional liability insurance coverage",
                     "Marketing and client booking handled for you",
@@ -156,11 +156,13 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/register">
-                  <Button size="lg" className="h-16 px-10 text-xl text-primary font-bold bg-accent hover:bg-accent/90 rounded-2xl shadow-xl shadow-black/10 border-none transition-all hover:scale-105">
-                    Apply to Join Now
-                  </Button>
-                </Link>
+                <div className="pt-8">
+                  <Link href="/register">
+                    <Button size="lg" className="h-16 px-10 text-xl text-[#0E2531] font-bold bg-accent hover:bg-accent/90 rounded-2xl shadow-xl shadow-black/10 border-none transition-all hover:scale-105">
+                      Apply to Join Now
+                    </Button>
+                  </Link>
+                </div>
               </div>
               <div className="relative h-[500px] w-full lg:h-[600px] rounded-[3rem] lg:rounded-[5rem] overflow-hidden shadow-2xl">
                 {teamImg && (
