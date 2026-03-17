@@ -156,7 +156,7 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
-                <div className="pt-8">
+                <div className="pt-12">
                   <Link href="/register">
                     <Button size="lg" className="h-16 px-10 text-xl text-[#0E2531] font-bold bg-accent hover:bg-accent/90 rounded-2xl shadow-xl shadow-black/10 border-none transition-all hover:scale-105">
                       Apply to Join Now
@@ -186,8 +186,8 @@ export default function Home() {
             <Image 
               src="https://firebasestorage.googleapis.com/v0/b/studio-3673070449-f277c.firebasestorage.app/o/CleanSweep-Layer%2011%20copy.png?alt=media&token=e060532e-cc86-43f8-8780-76371d95c936"
               alt="CleanSweep Logo"
-              width={180}
-              height={50}
+              width={240}
+              height={65}
             />
           </Link>
           <p className="text-sm text-muted-foreground font-bold uppercase tracking-widest">© 2024 CleanSweep National. Provider Network.</p>
