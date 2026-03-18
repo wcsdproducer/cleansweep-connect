@@ -5,6 +5,9 @@ import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore'
 
+// Export the config so it can be used for debugging/initialization elsewhere
+export { firebaseConfig };
+
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
 export function initializeFirebase() {
   if (!getApps().length) {
