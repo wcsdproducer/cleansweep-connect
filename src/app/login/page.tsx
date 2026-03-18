@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -11,8 +10,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { toast } from '@/hooks/use-toast';
 import { signInWithEmailAndPassword, signOut, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-import { useAuth, useFirestore } from '@/firebase';
-import { Eye, EyeOff, Lock, Mail, ArrowRight, ShieldCheck } from 'lucide-react';
+import { useAuth, useFirestore, firebaseConfig } from '@/firebase';
+import { Eye, EyeOff, Lock, Mail, ArrowRight, ShieldCheck, Info } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -27,12 +26,10 @@ export default function LoginPage() {
   const verifyUserRoleAndRedirect = async (uid: string) => {
     if (!db || !auth) return;
     try {
-      // Check for the role in the 'users' collection
       const userDoc = await getDoc(doc(db, 'users', uid));
       const userData = userDoc.data();
 
       if (!userData || userData.role !== 'Service Provider') {
-        // If they exist but aren't a service provider, log them out
         await signOut(auth);
         toast({
           variant: "destructive",
@@ -41,16 +38,9 @@ export default function LoginPage() {
         });
         return;
       }
-      
-      toast({ title: "Welcome back!", description: `Logged in as ${userData.firstName}.` });
       router.push("/dashboard");
     } catch (error: any) {
-      console.error("Role Verification Error:", error);
-      toast({
-        variant: "destructive",
-        title: "Session Error",
-        description: "We couldn't verify your provider status. Please contact support.",
-      });
+      toast({ variant: "destructive", title: "Verification Error", description: "Failed to verify profile." });
     }
   };
 
@@ -62,15 +52,10 @@ export default function LoginPage() {
       const result = await signInWithEmailAndPassword(auth, email, password);
       await verifyUserRoleAndRedirect(result.user.uid);
     } catch (error: any) {
-      console.error("Login Error:", error);
-      let message = "Invalid email or password.";
-      if (error.code === 'auth/user-not-found') message = "Account not found.";
-      if (error.code === 'auth/wrong-password') message = "Incorrect password.";
-      
       toast({
         variant: "destructive",
         title: "Login Failed",
-        description: message,
+        description: error.message,
       });
     } finally {
       setLoading(false);
@@ -87,11 +72,7 @@ export default function LoginPage() {
         await verifyUserRoleAndRedirect(result.user.uid);
       }
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Google Login Failed",
-        description: error.message,
-      });
+      toast({ variant: "destructive", title: "Google Login Failed", description: error.message });
     } finally {
       setLoading(false);
     }
@@ -111,8 +92,8 @@ export default function LoginPage() {
         </Link>
       </header>
 
-      <main className="flex-1 flex items-center justify-center p-6 bg-secondary/30">
-        <Card className="w-full max-w-md shadow-2xl border-none rounded-[2.5rem] overflow-hidden bg-white">
+      <main className="flex-1 flex flex-col items-center justify-center p-6 bg-secondary/30">
+        <Card className="w-full max-w-md shadow-2xl border-none rounded-[2.5rem] overflow-hidden bg-white mb-8">
           <CardHeader className="bg-primary/5 p-10 text-center border-b">
             <div className="flex justify-center mb-4">
               <div className="w-16 h-16 rounded-3xl bg-white shadow-lg flex items-center justify-center text-primary">
@@ -120,22 +101,18 @@ export default function LoginPage() {
               </div>
             </div>
             <CardTitle className="text-3xl text-primary font-bold font-headline">Provider Portal</CardTitle>
-            <CardDescription className="font-bold text-muted-foreground">Log in to manage your schedule and earnings.</CardDescription>
           </CardHeader>
           <CardContent className="p-10 space-y-6">
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email">Email</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10 h-12 rounded-xl" required />
                 </div>
               </div>
               <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="password">Password</Label>
-                  <Link href="#" className="text-xs text-primary font-bold hover:underline">Forgot?</Link>
-                </div>
+                <Label htmlFor="password">Password</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 h-12 rounded-xl" required />
@@ -144,8 +121,8 @@ export default function LoginPage() {
                   </button>
                 </div>
               </div>
-              <Button type="submit" disabled={loading} className="w-full h-14 bg-primary text-white rounded-2xl font-bold text-lg shadow-xl shadow-primary/20 transition-all active:scale-95">
-                {loading ? "Securing Session..." : "Log In to Dashboard"}
+              <Button type="submit" disabled={loading} className="w-full h-14 bg-primary text-white rounded-2xl font-bold">
+                {loading ? "Logging in..." : "Dashboard Login"}
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </form>
@@ -153,17 +130,29 @@ export default function LoginPage() {
               <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
               <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-4 text-muted-foreground font-bold">Quick Access</span></div>
             </div>
-            <Button variant="outline" onClick={handleGoogleLogin} disabled={loading} className="w-full h-14 rounded-2xl font-bold border-primary/20 hover:bg-primary/5 transition-all">
+            <Button variant="outline" onClick={handleGoogleLogin} disabled={loading} className="w-full h-14 rounded-2xl font-bold">
               <Image src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width={24} height={24} className="mr-3" />
               Login with Google
             </Button>
           </CardContent>
           <CardFooter className="p-10 pt-0 text-center">
             <p className="w-full text-sm font-medium text-muted-foreground">
-              New partner? <Link href="/register" className="text-primary font-bold hover:underline">Join CleanSweep Network</Link>
+              New partner? <Link href="/register" className="text-primary font-bold hover:underline">Apply here</Link>
             </p>
           </CardFooter>
         </Card>
+
+        {/* Configuration Debugger */}
+        <div className="w-full max-w-md p-4 bg-white/50 backdrop-blur-sm rounded-2xl border border-dashed border-muted-foreground/30 flex items-center justify-between text-[10px] text-muted-foreground font-mono">
+          <div className="flex items-center gap-2">
+            <Info className="w-3 h-3" />
+            <span>Config Debug:</span>
+          </div>
+          <div className="flex gap-4">
+            <span>Project: {firebaseConfig.projectId}</span>
+            <span>Key: ...{firebaseConfig.apiKey?.slice(-5)}</span>
+          </div>
+        </div>
       </main>
     </div>
   );
