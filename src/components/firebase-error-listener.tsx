@@ -13,11 +13,11 @@ export function FirebaseErrorListener() {
       toast({
         variant: 'destructive',
         title: 'Database Permission Denied',
-        description: `You do not have permission to ${error.context.operation} at ${error.context.path}. Please check your Security Rules.`,
+        description: `You do not have permission to ${error.request.method} at ${error.request.path}. Please check your Security Rules.`,
       });
 
       // In development, we also want to see this in the console for the agent loop
-      console.error('Firestore Permission Denied:', error.context);
+      console.error('Firestore Permission Denied:', error.request);
     };
 
     errorEmitter.on('permission-error', handlePermissionError);

@@ -27,7 +27,7 @@ export default function Dashboard() {
     return query(collection(db, 'jobs'), orderBy('createdAt', 'desc'), limit(5));
   }, [db]);
 
-  const { data: jobs, loading: jobsLoading } = useCollection(jobsQuery);
+  const { data: jobs, isLoading: jobsLoading } = useCollection(jobsQuery);
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
