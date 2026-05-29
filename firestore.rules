@@ -184,7 +184,7 @@ service cloud.firestore {
      */
     match /serviceJobs/{serviceJobId} {
       allow get: if isJobStakeholder(resource.data) || isAdmin();
-      allow list: if isAdmin() || (isSignedIn() && (request.query.limit <= 100 && (request.auth.uid == resource.data.clientId || request.auth.uid == resource.data.serviceProviderId)));
+      allow list: if isAdmin() || (isSignedIn() && (request.auth.uid == resource.data.clientId || request.auth.uid == resource.data.serviceProviderId));
       allow create: if isAdmin() || (isSignedIn() && (request.resource.data.clientId == request.auth.uid || request.resource.data.serviceProviderId == request.auth.uid));
       allow update: if isJobStakeholder(resource.data) || isAdmin();
       allow delete: if isAdmin();
