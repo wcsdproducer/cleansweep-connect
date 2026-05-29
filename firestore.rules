@@ -64,6 +64,22 @@ service cloud.firestore {
     // --- Collection Rules ---
 
     /**
+     * @description Rules for User RBAC documents (role-based access control).
+     * @path /users/{userId}
+     * @allow (get) Owner reads their own role document for session verification.
+     * @allow (create) User creates their own role doc during registration.
+     * @deny (list) No user can list all user documents.
+     * @principle Ownership via Path and Admin override.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    /**
      * @description Rules for Service Provider profiles.
      * @path /serviceProviders/{serviceProviderId}
      * @allow (create) User creates a profile where the doc ID matches their Auth UID.

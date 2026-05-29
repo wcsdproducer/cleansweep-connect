@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,17 +14,23 @@ import {
   MessageSquare
 } from 'lucide-react';
 import Link from 'next/link';
-import { useFirestore, useCollection } from '@/firebase';
-import { collection, query, orderBy, limit } from 'firebase/firestore';
+import { useFirestore, useCollection, useMemoFirebase, useUser } from '@/firebase';
+import { collection, query, orderBy, limit, where } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
 
 export default function Dashboard() {
   const db = useFirestore();
+  const { user } = useUser();
 
-  const jobsQuery = useMemo(() => {
-    if (!db) return null;
-    return query(collection(db, 'jobs'), orderBy('createdAt', 'desc'), limit(5));
-  }, [db]);
+  const jobsQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return query(
+      collection(db, 'serviceJobs'),
+      where('serviceProviderId', '==', user.uid),
+      orderBy('createdAt', 'desc'),
+      limit(5)
+    );
+  }, [db, user]);
 
   const { data: jobs, isLoading: jobsLoading } = useCollection(jobsQuery);
 
