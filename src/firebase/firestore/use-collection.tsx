@@ -91,17 +91,21 @@ export function useCollection<T = any>(
             ? (memoizedTargetRefOrQuery as CollectionReference).path
             : (memoizedTargetRefOrQuery as unknown as InternalQuery)._query.path.canonicalString()
 
-        const contextualError = new FirestorePermissionError({
-          operation: 'list',
-          path,
-        })
-
-        setError(contextualError)
+        setError(error)
         setData(null)
         setIsLoading(false)
 
-        // trigger global error propagation
-        errorEmitter.emit('permission-error', contextualError);
+        // Only emit global error for actual permission denials
+        if (error.code === 'permission-denied') {
+          const contextualError = new FirestorePermissionError({
+            operation: 'list',
+            path,
+          })
+          errorEmitter.emit('permission-error', contextualError);
+        } else {
+          // Log other errors (missing index, network, etc.) without alarming the user
+          console.warn(`[useCollection] Firestore error on "${path}":`, error.code, error.message);
+        }
       }
     );
 
