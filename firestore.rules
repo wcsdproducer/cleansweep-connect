@@ -121,6 +121,21 @@ service cloud.firestore {
     }
 
     /**
+     * @description Rules for Provider Coverage Areas.
+     * @path /provider_coverage/{providerId}
+     * @allow (get, create, update) Provider manages their own coverage area.
+     * @deny (list) No user can list all coverage areas.
+     * @principle Ownership via Path and Admin override.
+     */
+    match /provider_coverage/{providerId} {
+      allow get: if isOwner(providerId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(providerId);
+      allow update: if isOwner(providerId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    /**
      * @description Rules for Client profiles.
      * @path /clients/{clientId}
      * @allow (update) Client updates their own contact information.
