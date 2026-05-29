@@ -20,7 +20,7 @@ import {
 import { aiMessagingAssistant } from '@/ai/flows/ai-messaging-assistant';
 import { toast } from '@/hooks/use-toast';
 import { useFirestore, useCollection, useMemoFirebase, useUser } from '@/firebase';
-import { collection, query, orderBy, addDoc, serverTimestamp, where } from 'firebase/firestore';
+import { collection, query, addDoc, serverTimestamp, where } from 'firebase/firestore';
 
 export default function MessagesPage() {
   const db = useFirestore();
@@ -33,8 +33,7 @@ export default function MessagesPage() {
     if (!db || !user) return null;
     return query(
       collection(db, 'conversations'),
-      where('participantIds', 'array-contains', user.uid),
-      orderBy('createdAt', 'asc')
+      where('participantIds', 'array-contains', user.uid)
     );
   }, [db, user]);
 
