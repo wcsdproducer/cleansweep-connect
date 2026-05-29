@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/dashboard/sidebar-nav';
 import { Toaster } from '@/components/ui/toaster';
@@ -19,10 +19,14 @@ export default function DashboardLayout({
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
+  // Memoize the doc reference to prevent infinite re-subscription in useDoc
+  const userDocRef = useMemo(() => {
+    if (!user || !db) return null;
+    return doc(db, 'users', user.uid);
+  }, [user, db]);
+
   // Fetch the role-based document to verify access
-  const { data: userData, isLoading: isDocLoading } = useDoc(
-    user && db ? doc(db, 'users', user.uid) : null
-  );
+  const { data: userData, isLoading: isDocLoading } = useDoc(userDocRef);
 
   useEffect(() => {
     // Redirect to login if auth check finishes and no user is found
