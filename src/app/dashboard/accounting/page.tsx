@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -22,7 +21,7 @@ import {
   ResponsiveContainer,
   Cell
 } from 'recharts';
-import { useFirestore, useCollection } from '@/firebase';
+import { useFirestore, useCollection, useMemoFirebase, useUser } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 
 const data = [
@@ -36,11 +35,15 @@ const data = [
 
 export default function AccountingPage() {
   const db = useFirestore();
+  const { user } = useUser();
 
-  const invoicesQuery = useMemo(() => {
-    if (!db) return null;
-    return query(collection(db, 'invoices'), orderBy('createdAt', 'desc'));
-  }, [db]);
+  const invoicesQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return query(
+      collection(db, 'serviceProviders', user.uid, 'payoutTransactions'),
+      orderBy('createdAt', 'desc')
+    );
+  }, [db, user]);
 
   const { data: invoices } = useCollection(invoicesQuery);
 

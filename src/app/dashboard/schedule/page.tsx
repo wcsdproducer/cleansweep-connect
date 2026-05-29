@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
@@ -14,17 +14,22 @@ import {
   MoreVertical,
   CheckCircle2
 } from 'lucide-react';
-import { useFirestore, useCollection } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
+import { useFirestore, useCollection, useMemoFirebase, useUser } from '@/firebase';
+import { collection, query, orderBy, where } from 'firebase/firestore';
 
 export default function SchedulePage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const db = useFirestore();
+  const { user } = useUser();
 
-  const jobsQuery = useMemo(() => {
-    if (!db) return null;
-    return query(collection(db, 'jobs'), orderBy('createdAt', 'desc'));
-  }, [db]);
+  const jobsQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return query(
+      collection(db, 'serviceJobs'),
+      where('serviceProviderId', '==', user.uid),
+      orderBy('createdAt', 'desc')
+    );
+  }, [db, user]);
 
   const { data: jobs } = useCollection(jobsQuery);
 

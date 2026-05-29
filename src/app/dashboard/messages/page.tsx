@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,19 +19,24 @@ import {
 } from 'lucide-react';
 import { aiMessagingAssistant } from '@/ai/flows/ai-messaging-assistant';
 import { toast } from '@/hooks/use-toast';
-import { useFirestore, useCollection } from '@/firebase';
-import { collection, query, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
+import { useFirestore, useCollection, useMemoFirebase, useUser } from '@/firebase';
+import { collection, query, orderBy, addDoc, serverTimestamp, where } from 'firebase/firestore';
 
 export default function MessagesPage() {
   const db = useFirestore();
+  const { user } = useUser();
   const [inputText, setInputText] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const messagesQuery = useMemo(() => {
-    if (!db) return null;
-    return query(collection(db, 'messages'), orderBy('createdAt', 'asc'));
-  }, [db]);
+  const messagesQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return query(
+      collection(db, 'conversations'),
+      where('participantIds', 'array-contains', user.uid),
+      orderBy('createdAt', 'asc')
+    );
+  }, [db, user]);
 
   const { data: messages } = useCollection(messagesQuery);
 
