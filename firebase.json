@@ -1,4 +1,16 @@
 {
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "CleanSweep Connect",
+        "supportEmail": "support@cleansweepcleaningcompany.com",
+        "authorizedRedirectUris": [
+          "https://connect.cleansweepcleaningcompany.com",
+          "https://www.connect.cleansweepcleaningcompany.com"
+        ]
+      }
+    }
+  },
   "firestore": {
     "rules": "firestore.rules"
   },
