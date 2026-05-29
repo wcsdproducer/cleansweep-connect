@@ -15,7 +15,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { useFirestore, useCollection, useMemoFirebase, useUser } from '@/firebase';
-import { collection, query, orderBy, where } from 'firebase/firestore';
+import { collection, query, where } from 'firebase/firestore';
 
 export default function SchedulePage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -26,8 +26,7 @@ export default function SchedulePage() {
     if (!db || !user) return null;
     return query(
       collection(db, 'serviceJobs'),
-      where('serviceProviderId', '==', user.uid),
-      orderBy('createdAt', 'desc')
+      where('serviceProviderId', '==', user.uid)
     );
   }, [db, user]);
 

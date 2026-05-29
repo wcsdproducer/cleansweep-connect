@@ -22,7 +22,7 @@ import {
   Cell
 } from 'recharts';
 import { useFirestore, useCollection, useMemoFirebase, useUser } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
+import { collection, query } from 'firebase/firestore';
 
 const data = [
   { month: 'Jan', earnings: 1200 },
@@ -40,8 +40,7 @@ export default function AccountingPage() {
   const invoicesQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(
-      collection(db, 'serviceProviders', user.uid, 'payoutTransactions'),
-      orderBy('createdAt', 'desc')
+      collection(db, 'serviceProviders', user.uid, 'payoutTransactions')
     );
   }, [db, user]);
 

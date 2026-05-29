@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useFirestore, useCollection, useMemoFirebase, useUser } from '@/firebase';
-import { collection, query, orderBy, limit, where } from 'firebase/firestore';
+import { collection, query, limit, where } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
 
 export default function Dashboard() {
@@ -27,7 +27,6 @@ export default function Dashboard() {
     return query(
       collection(db, 'serviceJobs'),
       where('serviceProviderId', '==', user.uid),
-      orderBy('createdAt', 'desc'),
       limit(5)
     );
   }, [db, user]);
