@@ -154,7 +154,7 @@ export default function Register() {
       <header className="px-6 lg:px-12 h-20 flex items-center bg-white border-b sticky top-0 z-50">
         <Link href="/">
           <Image 
-            src="https://firebasestorage.googleapis.com/v0/b/studio-3673070449-f277c.firebasestorage.app/o/CleanSweep-Layer%2011%20copy.png?alt=media&token=e060532e-cc86-43f8-8780-76371d95c936"
+            src="https://firebasestorage.googleapis.com/v0/b/studio-3673070449-f277c.firebasestorage.app/o/brand%2Fcleansweep-logo.png?alt=media"
             alt="CleanSweep Logo"
             width={180}
             height={45}
