@@ -11,8 +11,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { toast } from '@/hooks/use-toast';
 import { signInWithEmailAndPassword, signOut, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-import { useAuth, useFirestore, firebaseConfig } from '@/firebase';
-import { Eye, EyeOff, Lock, Mail, ArrowRight, ShieldCheck, Info } from 'lucide-react';
+import { useAuth, useFirestore } from '@/firebase';
+import { Eye, EyeOff, Lock, Mail, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -143,17 +143,7 @@ export default function LoginPage() {
           </CardFooter>
         </Card>
 
-        {/* Configuration Debugger */}
-        <div className="w-full max-w-md p-4 bg-white/50 backdrop-blur-sm rounded-2xl border border-dashed border-muted-foreground/30 flex items-center justify-between text-[10px] text-muted-foreground font-mono">
-          <div className="flex items-center gap-2">
-            <Info className="w-3 h-3" />
-            <span>Config Debug:</span>
-          </div>
-          <div className="flex gap-4">
-            <span>Project: {firebaseConfig.projectId}</span>
-            <span>Key: ...{firebaseConfig.apiKey?.slice(-5)}</span>
-          </div>
-        </div>
+
       </main>
     </div>
   );

@@ -10,11 +10,11 @@ import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { ShieldCheck, Eye, EyeOff, Lock, Mail, ChevronRight, Sparkles, MapPin, Phone, User, AlertCircle, Info } from 'lucide-react';
+import { ShieldCheck, Eye, EyeOff, Lock, Mail, ChevronRight, Sparkles, MapPin, Phone, User, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { useFirestore, useAuth, firebaseConfig } from '@/firebase';
+import { useFirestore, useAuth } from '@/firebase';
 import { useRouter } from 'next/navigation';
 
 export default function Register() {
@@ -277,17 +277,7 @@ export default function Register() {
           </CardFooter>
         </Card>
 
-        {/* Configuration Debugger */}
-        <div className="w-full max-w-xl p-4 bg-white/50 backdrop-blur-sm rounded-2xl border border-dashed border-muted-foreground/30 flex items-center justify-between text-[10px] text-muted-foreground font-mono">
-          <div className="flex items-center gap-2">
-            <Info className="w-3 h-3" />
-            <span>Config Debug:</span>
-          </div>
-          <div className="flex gap-4">
-            <span>Project: {firebaseConfig.projectId}</span>
-            <span>Key: ...{firebaseConfig.apiKey?.slice(-5)}</span>
-          </div>
-        </div>
+
       </main>
     </div>
   );
